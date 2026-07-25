@@ -116,30 +116,6 @@ type ModalKey =
   | "batch"
   | null;
 
-declare global {
-  interface Window {
-    Telegram?: {
-      WebApp?: {
-        initData: string;
-        ready: () => void;
-        expand: () => void;
-        enableClosingConfirmation: () => void;
-        initDataUnsafe?: {
-          user?: {
-            id: number;
-            first_name: string;
-            photo_url?: string;
-          };
-        };
-        HapticFeedback?: {
-          impactOccurred: (style: "light" | "medium" | "heavy") => void;
-        };
-        showConfirm?: (message: string, callback: (ok: boolean) => void) => void;
-      };
-    };
-  }
-}
-
 const emptyUser: UserData = {
   groups: [],
   stats_tasks: [],
