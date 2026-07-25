@@ -215,7 +215,12 @@ function useTelegram() {
 }
 
 export default function Home() {
-  const telegramUser = useTelegram();
+const {
+  telegramUser,
+  telegramReady,
+  telegramInitData
+} = useTelegram();
+
 
   const [activePage, setActivePage] = useState<PageKey>("overview");
   const [activeTaskTab, setActiveTaskTab] = useState<"stats" | "dirs">("stats");
