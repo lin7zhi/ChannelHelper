@@ -647,29 +647,48 @@ export default function App() {
   const ab = data?.user.address_book || {}
 
   // ===== Actions =====
-  async function handleAddSync() {
-    const tgt = syncTgts.filter(t => t.trim())
-    if (!syncSrc || !tgt.length) return showToast('请填写源频道和至少一个目标', 'error')
-    const res = await api.addGroup({ name: syncName, src: syncSrc, tgt })
-    if (res.ok) { showToast('同步组已创建'); setModal(null); setData({data!, user: res.user }); setSyncName(''); setSyncSrc(''); setSyncTgts(['']) }
-    else showToast(res.msg || '失败', 'error')
-  }
+async function handleAddSync() {
+  const tgt = syncTgts.filter(t => t.trim())
+  if (!syncSrc || !tgt.length) return showToast('请填写源频道和至少一个目标', 'error')
+  const res = await api.addGroup({ name: syncName, src: syncSrc, tgt })
+  if (res.ok) {
+    showToast('同步组已创建')
+    setModal(null)
+    setData(prev => prev ? { ...prev, user: res.user } : null)
+    setSyncName('')
+    setSyncSrc('')
+    setSyncTgts([''])
+  } else showToast(res.msg || '失败', 'error')
+}
 
-  async function handleDeleteSync(idx: number) {
-    const res = await api.deleteGroup(idx)
-    if (res.ok) { showToast('已删除'); setData({ ...data!, user: res.user }) }
+async function handleDeleteSync(idx: number) {
+  const res = await api.deleteGroup(idx)
+  if (res.ok) {
+    showToast('已删除')
+    setData(prev => prev ? { ...prev, user: res.user } : null)
   }
+}
 
-  async function handleAddChannel() {
-    if (!addrId || !addrName) return showToast('请填写完整', 'error')
-    const res = await api.addChannel(addrId, addrName)
-    if (res.ok) { showToast('已添加'); setModal(null); setData({ ...data!, user: res.user }); setAddrId(''); setAddrName('') }
+async function handleAddChannel() {
+  if (!addrId || !addrName) return showToast('请填写完整', 'error')
+  const res = await api.addChannel(addrId, addrName)
+  if (res.ok) {
+    showToast('已添加')
+    setModal(null)
+    setData(prev => prev ? { ...prev, user: res.user } : null)
+    setAddrId('')
+    setAddrName('')
   }
+}
 
-  async function handleDeleteChannel(cid: string) {
-    const res = await api.deleteChannel(cid)
-    if (res.ok) { showToast('已删除'); setData({ ...data!, user: res.user }) }
+async function handleDeleteChannel(cid: string) {
+  const res = await api.deleteChannel(cid)
+  if (res.ok) {
+    showToast('已删除')
+    setData(prev => prev ? { ...prev, user: res.user } : null)
   }
+}
+
 
   async function handleSendBtnNew() {
     if (!bnCh) return showToast('请填写频道ID', 'error')
