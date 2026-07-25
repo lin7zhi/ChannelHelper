@@ -132,7 +132,7 @@ const nav = [
 ];
 
 function getInitData() {
-  return window.Telegram?.WebApp?.initData || "";
+  return getTelegramInitData();
 }
 
 async function requestApi<T>(
