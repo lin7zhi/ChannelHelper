@@ -1,0 +1,9 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "https://ljx77qaq-nine7.hf.space/api/$1"
+    }
+  ]
+}
+
