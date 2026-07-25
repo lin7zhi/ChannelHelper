@@ -4,32 +4,58 @@
 
 :root {
   --bg: #06070b;
-  --panel: rgba(16, 19, 29, 0.72);
+  --panel: rgba(16, 19, 29, 0.82);
+  --panel-solid: #10131d;
   --line: rgba(255, 255, 255, 0.09);
   --text: #f4f6fb;
   --muted: #8d95a8;
   --signal: #b6ff4d;
   --violet: #9477ff;
   --coral: #ff7464;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-* {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
 html {
+  min-height: 100%;
   background: var(--bg);
+  color-scheme: dark;
+  text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
   min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0;
   overflow-x: hidden;
+  overscroll-behavior-x: none;
   color: var(--text);
   background:
-    radial-gradient(circle at 14% 10%, rgba(148, 119, 255, 0.2), transparent 28rem),
-    radial-gradient(circle at 88% 17%, rgba(182, 255, 77, 0.12), transparent 24rem),
-    radial-gradient(circle at 50% 98%, rgba(255, 116, 100, 0.12), transparent 32rem),
-    #06070b;
+    radial-gradient(
+      circle at 14% 10%,
+      rgba(148, 119, 255, 0.18),
+      transparent 28rem
+    ),
+    radial-gradient(
+      circle at 88% 17%,
+      rgba(182, 255, 77, 0.1),
+      transparent 24rem
+    ),
+    radial-gradient(
+      circle at 50% 98%,
+      rgba(255, 116, 100, 0.1),
+      transparent 32rem
+    ),
+    var(--bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body::before {
@@ -38,22 +64,46 @@ body::before {
   inset: 0;
   pointer-events: none;
   content: "";
-  opacity: 0.3;
+  opacity: 0.24;
   background-image:
     linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.025) 1px,
+      transparent 1px
+    );
   background-size: 44px 44px;
   mask-image: radial-gradient(circle at center, black, transparent 82%);
+  -webkit-mask-image: radial-gradient(
+    circle at center,
+    black,
+    transparent 82%
+  );
 }
 
 button,
 input,
-textarea {
+textarea,
+select {
   font: inherit;
 }
 
 button {
-  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+input,
+textarea,
+select {
+  font-size: 16px;
+}
+
+img,
+video,
+svg {
+  max-width: 100%;
 }
 
 ::selection {
@@ -63,44 +113,74 @@ button {
 
 ::-webkit-scrollbar {
   width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  border-radius: 99px;
+  border-radius: 999px;
   background: rgba(255, 255, 255, 0.2);
 }
 
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/*
+ * 桌面端毛玻璃。
+ * 通过单独的背景颜色提供不支持 backdrop-filter 时的回退效果。
+ */
 .glass {
   border: 1px solid var(--line);
   background: var(--panel);
   box-shadow: 0 18px 70px rgba(0, 0, 0, 0.25);
-  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(18px) saturate(115%);
+  backdrop-filter: blur(18px) saturate(115%);
 }
 
+/*
+ * 表单输入。
+ */
 .input {
   width: 100%;
+  min-height: 46px;
   border: 1px solid var(--line);
   outline: none;
   border-radius: 14px;
   padding: 12px 14px;
   color: var(--text);
   background: rgba(255, 255, 255, 0.045);
-  transition: border-color 160ms ease, background 160ms ease;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease;
 }
 
 .input:focus {
   border-color: rgba(182, 255, 77, 0.65);
   background: rgba(182, 255, 77, 0.045);
+  box-shadow: 0 0 0 3px rgba(182, 255, 77, 0.08);
 }
 
 .input::placeholder {
   color: #687084;
 }
 
+.input:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 textarea.input {
   resize: vertical;
 }
 
+/*
+ * 桌面端卡片扫光。
+ */
 .sheen {
   position: relative;
   overflow: hidden;
@@ -108,13 +188,14 @@ textarea.input {
 
 .sheen::after {
   position: absolute;
+  z-index: 1;
   top: -150%;
   left: -30%;
   width: 35%;
   height: 350%;
   pointer-events: none;
   content: "";
-  transform: rotate(22deg);
+  transform: translate3d(0, 0, 0) rotate(22deg);
   background: linear-gradient(
     to right,
     transparent,
@@ -124,6 +205,190 @@ textarea.input {
   transition: transform 650ms ease;
 }
 
-.sheen:hover::after {
-  transform: translateX(480%) rotate(22deg);
+@media (hover: hover) and (pointer: fine) {
+  .sheen:hover::after {
+    transform: translate3d(480%, 0, 0) rotate(22deg);
+  }
+}
+
+/*
+ * Vercel/Next 页面载入期间避免布局跳动。
+ */
+main {
+  isolation: isolate;
+}
+
+/*
+ * 长列表卡片在进入可视区域前跳过内部绘制。
+ * contain-intrinsic-size 为浏览器预留近似高度，避免滚动条跳动。
+ */
+article.glass {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 280px;
+}
+
+/*
+ * 移动端性能模式。
+ *
+ * 手机上的主要性能消耗来自：
+ * 1. 大面积 backdrop-filter
+ * 2. fixed 元素上的实时模糊
+ * 3. 无限运动的大尺寸 blur 光球
+ * 4. 页面进入时的 CSS filter: blur()
+ * 5. 每张卡片的扫光伪元素
+ */
+@media (max-width: 1023px), (hover: none) and (pointer: coarse) {
+  body {
+    background:
+      radial-gradient(
+        circle at 10% 0%,
+        rgba(148, 119, 255, 0.11),
+        transparent 22rem
+      ),
+      radial-gradient(
+        circle at 100% 30%,
+        rgba(182, 255, 77, 0.06),
+        transparent 20rem
+      ),
+      var(--bg);
+  }
+
+  body::before {
+    position: absolute;
+    opacity: 0.13;
+    background-size: 52px 52px;
+    mask-image: linear-gradient(to bottom, black, transparent 85%);
+    -webkit-mask-image: linear-gradient(to bottom, black, transparent 85%);
+  }
+
+  /*
+   * 手机端改成接近实色的透明面板。
+   * 视觉仍然有层次，但不再实时计算背后像素模糊。
+   */
+  .glass {
+    background: rgba(15, 18, 27, 0.96);
+    box-shadow: 0 12px 38px rgba(0, 0, 0, 0.24);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  /*
+   * Home 组件中第一个 aria-hidden 元素是持续运动的背景光球容器。
+   * 手机端不绘制它，直接消除持续 GPU 占用。
+   */
+  main > div[aria-hidden="true"] {
+    display: none !important;
+  }
+
+  /*
+   * Framer Motion 页面切换中使用了 filter: blur()。
+   * filter 会使整个页面每帧离屏渲染，手机端强制关闭。
+   */
+  main section.min-w-0 > div {
+    filter: none !important;
+  }
+
+  .sheen::after {
+    display: none;
+  }
+
+  /*
+   * 固定底栏使用不透明背景，避免滚动时持续重算毛玻璃。
+   */
+  nav.fixed.glass {
+    background: rgba(12, 14, 21, 0.98);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.48);
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+
+  /*
+   * 弹窗遮罩的 backdrop-blur-md 同样较昂贵。
+   */
+  .fixed.inset-0.backdrop-blur-md {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    background: rgba(0, 0, 0, 0.82) !important;
+  }
+
+  /*
+   * 移动端避免大范围 transition: all。
+   */
+  button,
+  a,
+  .input {
+    transition-duration: 120ms;
+  }
+
+  button:active {
+    transition-duration: 0ms;
+  }
+
+  article.glass {
+    contain: layout paint style;
+    content-visibility: auto;
+    contain-intrinsic-size: auto 270px;
+  }
+
+  /*
+   * 增加底部安全距离，避免内容被 iOS Home Indicator 和导航遮住。
+   */
+  main {
+    padding-bottom: calc(96px + var(--safe-bottom));
+  }
+}
+
+/*
+ * 小屏手机进一步压缩昂贵装饰并优化空间。
+ */
+@media (max-width: 520px) {
+  body {
+    background:
+      radial-gradient(
+        circle at 20% 0%,
+        rgba(148, 119, 255, 0.09),
+        transparent 18rem
+      ),
+      var(--bg);
+  }
+
+  body::before {
+    opacity: 0.09;
+  }
+
+  .glass {
+    box-shadow: 0 9px 28px rgba(0, 0, 0, 0.2);
+  }
+
+  article.glass {
+    contain-intrinsic-size: auto 250px;
+  }
+}
+
+/*
+ * 用户开启“减少动态效果”时，关闭非必要动画。
+ */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+
+  main > div[aria-hidden="true"] {
+    display: none !important;
+  }
+
+  .sheen::after {
+    display: none !important;
+  }
 }
