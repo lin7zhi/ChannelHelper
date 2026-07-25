@@ -306,7 +306,7 @@ const {
 }
 
 return (
-  <main className="min-h-screen px-4 py-4 md:px-8 md:py-7">
+  <main className="min-h-screen px-2.5 py-2.5 md:px-8 md:py-7">
       <AmbientOrbs />
 
       <div className="mx-auto grid max-w-[1600px] gap-5 lg:grid-cols-[244px_minmax(0,1fr)]">
@@ -860,7 +860,7 @@ function Overview({
             <p className="font-mono text-[10px] tracking-[0.2em] text-[#b6ff4d]">
               AUTOMATION OBSERVATORY
             </p>
-            <h2 className="mt-4 max-w-3xl text-4xl font-semibold leading-[0.98] tracking-[-0.06em] md:text-6xl">
+            <h2 className="mt-3 max-w-3xl text-[2rem] font-semibold leading-[0.98] tracking-[-0.06em] sm:text-4xl md:text-6xl">
               频道系统，
               <br />
               保持有序运转。
@@ -1122,7 +1122,7 @@ function ToolsPage({
             key={tool.title}
             onClick={() => openModal(tool.modal)}
             className={clsx(
-              "sheen glass group relative min-h-64 overflow-hidden rounded-[24px] p-5 text-left transition hover:-translate-y-1",
+  "sheen glass group relative min-h-[158px] overflow-hidden rounded-[20px] p-3.5 text-left transition hover:-translate-y-1 sm:min-h-64 sm:rounded-[24px] sm:p-5",
               index === 0 && "xl:col-span-2"
             )}
             initial={{ opacity: 0, y: 16 }}
@@ -1349,7 +1349,7 @@ function PagePanel({
       <div className="mb-7 flex flex-col justify-between gap-5 md:flex-row md:items-end">
         <div>
           <p className="font-mono text-[10px] tracking-[0.2em] text-[#b6ff4d]">{eyebrow}</p>
-          <h2 className="mt-3 text-4xl font-semibold tracking-[-0.06em] md:text-5xl">{title}</h2>
+          <h2 className="mt-2 text-[1.8rem] font-semibold tracking-[-0.055em] sm:text-4xl md:text-5xl">
           <p className="mt-3 max-w-xl text-sm leading-7 text-zinc-400">{description}</p>
         </div>
         {action}
@@ -1571,7 +1571,7 @@ function Modal({
           }}
         >
           <motion.div
-            className="glass max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-t-[28px] p-5 md:rounded-[28px] md:p-7"
+            className="glass max-h-[88dvh] w-full max-w-2xl overflow-y-auto rounded-t-[22px] p-4 md:rounded-[28px] md:p-7"
             initial={{ y: 50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 50, opacity: 0 }}
