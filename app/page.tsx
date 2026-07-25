@@ -165,20 +165,53 @@ async function uploadApi<T>(path: string, body: FormData): Promise<T> {
 }
 
 function useTelegram() {
-  const [telegramUser, setTelegramUser] = useState<
-    | { id: number; first_name: string; photo_url?: string }
-    | undefined
-  >();
+  const [telegramUser, setTelegramUser] = useState<TelegramUser | undefined>();
+  const [telegramReady, setTelegramReady] = useState(false);
 
   useEffect(() => {
-    const tg = window.Telegram?.WebApp;
-    tg?.ready();
-    tg?.expand();
-    tg?.enableClosingConfirmation();
-    setTelegramUser(tg?.initDataUnsafe?.user);
+    let retryTimer: number | undefined;
+    let retryCount = 0;
+
+    const initialize = () => {
+      const tg = initializeTelegramWebApp();
+
+      if (tg) {
+        setTelegramUser(getTelegramUser());
+        setTelegramReady(true);
+
+        if (!tg.initData) {
+          console.warn(
+            "Telegram WebApp 已加载，但 initData 为空。请确认页面是在 Telegram 内打开。"
+          );
+        }
+
+        return;
+      }
+
+      retryCount += 1;
+
+      if (retryCount < 30) {
+        retryTimer = window.setTimeout(initialize, 100);
+      } else {
+        setTelegramReady(true);
+        console.warn("未检测到 Telegram WebApp SDK。");
+      }
+    };
+
+    initialize();
+
+    return () => {
+      if (retryTimer) {
+        window.clearTimeout(retryTimer);
+      }
+    };
   }, []);
 
-  return telegramUser;
+  return {
+    telegramUser,
+    telegramReady,
+    telegramInitData: getTelegramInitData()
+  };
 }
 
 export default function Home() {
