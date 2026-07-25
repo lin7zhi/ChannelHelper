@@ -133,18 +133,18 @@ function Btn({ variant = 'primary', className, children, ...props }: {
     success: 'bg-mint-muted text-mint hover:bg-mint/20',
   }
   return (
-    <motion.button
-      whileTap={{ scale: 0.97 }}
+    <button
       className={cn(
-        'px-5 py-3 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2',
+        'px-5 py-3 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 active:scale-[0.97]',
         styles[variant], className
       )}
       {...props}
     >
       {children}
-    </motion.button>
+    </button>
   )
 }
+
 
 // ===== Channel Chip =====
 function ChannelChip({ cid, name, onClick }: { cid: string; name: string; onClick: () => void }) {
