@@ -43,6 +43,13 @@ import {
 import { AnimatePresence, motion } from "framer-motion";
 import { FormEvent, ReactNode, useEffect, useMemo, useState } from "react";
 import clsx from "clsx";
+import {
+  getTelegramInitData,
+  getTelegramUser,
+  initializeTelegramWebApp,
+  type TelegramUser
+} from "@/lib/telegram";
+
 
 type Target = {
   channel_id: string;
