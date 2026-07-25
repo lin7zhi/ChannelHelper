@@ -392,3 +392,455 @@ article.glass {
     display: none !important;
   }
 }
+
+/* =========================================================
+   Mobile Compact Layout
+   手机紧凑布局
+   ========================================================= */
+
+@media (max-width: 640px) {
+  :root {
+    --mobile-page-padding: 10px;
+    --mobile-card-radius: 18px;
+  }
+
+  body {
+    font-size: 13px;
+  }
+
+  main {
+    padding: 10px 10px 88px !important;
+  }
+
+  /*
+   * 顶部导航
+   */
+  main > div.mx-auto > section > header {
+    min-height: 52px;
+    margin-bottom: 12px !important;
+    padding: 8px 10px !important;
+    border-radius: 17px !important;
+  }
+
+  main > div.mx-auto > section > header h1 {
+    margin-top: 1px !important;
+    font-size: 15px !important;
+    line-height: 1.2 !important;
+  }
+
+  main > div.mx-auto > section > header p {
+    font-size: 8px !important;
+    line-height: 1.2 !important;
+  }
+
+  main > div.mx-auto > section > header button {
+    width: 34px !important;
+    height: 34px !important;
+  }
+
+  /*
+   * 页面标题区域
+   */
+  main section.min-w-0 > div > section > div:first-child {
+    gap: 10px !important;
+    margin-bottom: 16px !important;
+  }
+
+  main section.min-w-0 > div > section > div:first-child h2 {
+    margin-top: 6px !important;
+    font-size: 29px !important;
+    line-height: 0.98 !important;
+    letter-spacing: -0.055em !important;
+  }
+
+  main section.min-w-0 > div > section > div:first-child p {
+    margin-top: 8px !important;
+    font-size: 11px !important;
+    line-height: 1.6 !important;
+  }
+
+  /*
+   * 所有卡片统一缩小
+   */
+  .glass {
+    border-radius: var(--mobile-card-radius) !important;
+  }
+
+  article.glass,
+  .glass.sheen {
+    padding: 13px !important;
+  }
+
+  /*
+   * 首页主视觉区域
+   */
+  main section.min-w-0 > div > div > section:first-child {
+    padding: 16px !important;
+    border-radius: 20px !important;
+  }
+
+  main section.min-w-0 > div > div > section:first-child h2 {
+    font-size: 34px !important;
+    line-height: 0.98 !important;
+  }
+
+  main section.min-w-0 > div > div > section:first-child p {
+    font-size: 12px !important;
+    line-height: 1.65 !important;
+  }
+
+  /*
+   * 首页状态圆盘区域
+   */
+  main section.min-w-0 > div > div > section:first-child
+    .min-h-\[240px\] {
+    min-height: 180px !important;
+    padding: 13px !important;
+    border-radius: 18px !important;
+  }
+
+  main section.min-w-0 > div > div > section:first-child
+    .h-32.w-32 {
+    width: 92px !important;
+    height: 92px !important;
+  }
+
+  main section.min-w-0 > div > div > section:first-child
+    .h-32.w-32 svg {
+    width: 30px !important;
+    height: 30px !important;
+  }
+
+  /*
+   * 首页统计卡片
+   */
+  main section.min-w-0 > div > div > section:nth-child(2) {
+    gap: 8px !important;
+  }
+
+  main section.min-w-0 > div > div > section:nth-child(2) > div {
+    min-height: 112px;
+    padding: 12px !important;
+    border-radius: 16px !important;
+  }
+
+  main section.min-w-0 > div > div > section:nth-child(2) > div p.font-mono {
+    margin-top: 20px !important;
+    font-size: 28px !important;
+  }
+
+  /*
+   * 首页底部信息卡
+   */
+  main section.min-w-0 > div > div > section:nth-child(3) {
+    gap: 10px !important;
+  }
+
+  main section.min-w-0 > div > div > section:nth-child(3) > div {
+    padding: 13px !important;
+    border-radius: 18px !important;
+  }
+
+  /*
+   * 工具箱卡片
+   */
+  .tool-grid {
+    gap: 8px !important;
+  }
+
+  .tool-grid .tool-card {
+    min-height: 164px !important;
+    padding: 13px !important;
+    border-radius: 17px !important;
+  }
+
+  .tool-grid .tool-card .t-icon {
+    font-size: 22px !important;
+  }
+
+  .tool-grid .tool-card .t-name {
+    font-size: 12px !important;
+  }
+
+  .tool-grid .tool-card .t-desc {
+    font-size: 10px !important;
+    line-height: 1.45 !important;
+  }
+
+  /*
+   * 工具箱新版卡片
+   */
+  main section.min-w-0 > div > section > div.grid > button {
+    min-height: 158px !important;
+    padding: 13px !important;
+    border-radius: 18px !important;
+  }
+
+  main section.min-w-0 > div > section > div.grid > button h3 {
+    font-size: 14px !important;
+    line-height: 1.3 !important;
+  }
+
+  main section.min-w-0 > div > section > div.grid > button p {
+    font-size: 10px !important;
+    line-height: 1.5 !important;
+  }
+
+  main section.min-w-0 > div > section > div.grid > button .h-11 {
+    width: 36px !important;
+    height: 36px !important;
+  }
+
+  /*
+   * 同步组、统计任务、目录任务卡片
+   */
+  main section.min-w-0 article {
+    padding: 13px !important;
+    border-radius: 18px !important;
+  }
+
+  main section.min-w-0 article h3 {
+    font-size: 14px !important;
+    line-height: 1.35 !important;
+  }
+
+  main section.min-w-0 article p {
+    font-size: 10px !important;
+  }
+
+  main section.min-w-0 article .mt-6 {
+    margin-top: 14px !important;
+  }
+
+  main section.min-w-0 article .mt-7 {
+    margin-top: 16px !important;
+  }
+
+  /*
+   * 任务页顶部切换按钮
+   */
+  main section.min-w-0 .mb-6 {
+    margin-bottom: 13px !important;
+  }
+
+  main section.min-w-0 .mb-6 button {
+    padding: 8px 9px !important;
+    font-size: 10px !important;
+  }
+
+  /*
+   * 数据格子
+   */
+  main section.min-w-0 .grid-cols-2 > div,
+  main section.min-w-0 .grid-cols-3 > div {
+    padding: 9px !important;
+    border-radius: 12px !important;
+  }
+
+  main section.min-w-0 .grid-cols-2 > div p:last-child,
+  main section.min-w-0 .grid-cols-3 > div p:last-child {
+    margin-top: 5px !important;
+    font-size: 11px !important;
+  }
+
+  /*
+   * 频道簿
+   */
+  main section.min-w-0 .h-10.w-10 {
+    width: 34px !important;
+    height: 34px !important;
+  }
+
+  /*
+   * 所有按钮缩小
+   */
+  button.inline-flex {
+    min-height: 36px !important;
+    padding: 8px 11px !important;
+    border-radius: 10px !important;
+    font-size: 11px !important;
+  }
+
+  /*
+   * 页面内的普通按钮
+   */
+  main button {
+    font-size: 11px;
+  }
+
+  /*
+   * 输入框和表单
+   */
+  .input {
+    min-height: 42px !important;
+    padding: 9px 11px !important;
+    border-radius: 11px !important;
+    font-size: 16px !important;
+  }
+
+  textarea.input {
+    min-height: 90px !important;
+  }
+
+  label > span:first-child,
+  form > div > p,
+  form p {
+    font-size: 11px !important;
+  }
+
+  /*
+   * 表单网格在手机上减少间距
+   */
+  form {
+    gap: 13px !important;
+  }
+
+  form .space-y-5 > * + *,
+  .space-y-5 > * + * {
+    margin-top: 13px !important;
+  }
+
+  form .space-y-3 > * + *,
+  .space-y-3 > * + * {
+    margin-top: 8px !important;
+  }
+
+  /*
+   * 弹窗
+   */
+  .fixed.inset-0.z-\[100\] {
+    padding: 0 !important;
+  }
+
+  .fixed.inset-0.z-\[100\] > div {
+    max-height: 88dvh !important;
+    padding: 15px !important;
+    border-radius: 21px 21px 0 0 !important;
+  }
+
+  .fixed.inset-0.z-\[100\] h2 {
+    font-size: 19px !important;
+  }
+
+  .fixed.inset-0.z-\[100\] .mb-7 {
+    margin-bottom: 17px !important;
+  }
+
+  .fixed.inset-0.z-\[100\] .h-10.w-10 {
+    width: 34px !important;
+    height: 34px !important;
+  }
+
+  /*
+   * 弹窗里的目标频道行
+   */
+  .fixed.inset-0.z-\[100\] .rounded-2xl {
+    border-radius: 14px !important;
+  }
+
+  .fixed.inset-0.z-\[100\] .p-4 {
+    padding: 11px !important;
+  }
+
+  /*
+   * 频道选择标签
+   */
+  .fixed.inset-0.z-\[100\] button.rounded-lg {
+    padding: 6px 8px !important;
+    font-size: 10px !important;
+  }
+
+  /*
+   * 空状态区域
+   */
+  main section.min-w-0 .min-h-72 {
+    min-height: 220px !important;
+    padding: 18px !important;
+  }
+
+  main section.min-w-0 .min-h-72 h3 {
+    font-size: 15px !important;
+  }
+
+  main section.min-w-0 .min-h-72 p {
+    font-size: 11px !important;
+    line-height: 1.6 !important;
+  }
+
+  /*
+   * 底部导航缩小
+   */
+  nav.fixed.bottom-4 {
+    right: 8px !important;
+    bottom: calc(7px + env(safe-area-inset-bottom)) !important;
+    left: 8px !important;
+    padding: 4px !important;
+    border-radius: 16px !important;
+  }
+
+  nav.fixed.bottom-4 button {
+    min-height: 44px !important;
+    padding: 5px 2px !important;
+    gap: 2px !important;
+    font-size: 9px !important;
+  }
+
+  nav.fixed.bottom-4 button svg {
+    width: 15px !important;
+    height: 15px !important;
+  }
+
+  /*
+   * Toast 缩小
+   */
+  .fixed.bottom-24 {
+    right: 12px !important;
+    bottom: calc(70px + env(safe-area-inset-bottom)) !important;
+    left: 12px !important;
+    width: auto !important;
+    max-width: calc(100vw - 24px) !important;
+    transform: none !important;
+    justify-content: center;
+    padding: 10px 13px !important;
+    font-size: 11px !important;
+    border-radius: 13px !important;
+  }
+
+  /*
+   * 减少移动端阴影强度
+   */
+  .shadow-2xl,
+  .shadow-\[0_18px_70px_rgba\(0\,0\,0\,0\.25\)\] {
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.26) !important;
+  }
+}
+
+/* 更小屏幕，例如 360px 宽度设备 */
+@media (max-width: 380px) {
+  main {
+    padding-right: 8px !important;
+    padding-left: 8px !important;
+  }
+
+  main section.min-w-0 > div > div > section:first-child h2 {
+    font-size: 30px !important;
+  }
+
+  .tool-grid {
+    gap: 6px !important;
+  }
+
+  main section.min-w-0 > section > div.grid {
+    gap: 8px !important;
+  }
+
+  .tool-grid .tool-card,
+  main section.min-w-0 > section > div.grid > button {
+    min-height: 145px !important;
+    padding: 10px !important;
+  }
+
+  nav.fixed.bottom-4 button {
+    font-size: 8px !important;
+  }
+}
