@@ -257,8 +257,13 @@ const {
   };
 
   useEffect(() => {
-    refresh();
-  }, []);
+  if (!telegramReady) {
+    return;
+  }
+
+  refresh();
+}, [telegramReady]);
+
 
   const updateFromResponse = (result: { ok: boolean; user?: UserData; msg?: string }) => {
     if (!result.ok) {
@@ -296,8 +301,12 @@ const {
     [activePage]
   );
 
-  return (
-    <main className="min-h-screen px-4 py-4 md:px-8 md:py-7">
+  if (telegramReady && !telegramInitData) {
+  return <TelegramOnlyScreen />;
+}
+
+return (
+  <main className="min-h-screen px-4 py-4 md:px-8 md:py-7">
       <AmbientOrbs />
 
       <div className="mx-auto grid max-w-[1600px] gap-5 lg:grid-cols-[244px_minmax(0,1fr)]">
@@ -2475,4 +2484,61 @@ function MobileNav({
 function channelName(id: string, channels: Record<string, string>) {
   const name = channels[id] || channels[String(id)];
   return name ? `${name} (${id})` : id || "未设置";
+}
+
+function TelegramOnlyScreen() {
+  return (
+    <main className="relative grid min-h-screen place-items-center overflow-hidden px-5 py-10">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute left-1/2 top-1/2 h-80 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#9477ff]/10 blur-[100px]"
+      />
+
+      <section className="glass relative w-full max-w-md rounded-[28px] p-7 text-center">
+        <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-[#b6ff4d] text-black">
+          <Radio size={28} strokeWidth={1.8} />
+        </div>
+
+        <p className="mt-6 font-mono text-[10px] tracking-[0.2em] text-[#b6ff4d]">
+          TELEGRAM WEB APP ONLY
+        </p>
+
+        <h1 className="mt-3 text-2xl font-semibold tracking-tight">
+          请从 Telegram 内打开
+        </h1>
+
+        <p className="mt-4 text-sm leading-7 text-zinc-400">
+          当前页面没有检测到 Telegram 身份验证信息。
+          请通过机器人菜单中的 Web App 按钮进入控制台。
+        </p>
+
+        <div className="mt-6 rounded-2xl border border-white/10 bg-black/20 p-4 text-left">
+          <div className="flex items-start gap-3">
+            <CircleAlert
+              size={17}
+              className="mt-0.5 shrink-0 text-[#ff7464]"
+            />
+            <div>
+              <p className="text-xs font-medium text-zinc-200">
+                当前无法完成身份验证
+              </p>
+              <p className="mt-2 text-[11px] leading-5 text-zinc-500">
+                不要直接复制浏览器地址访问。Telegram 只有在 Mini App
+                环境中才会注入 initData。
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => window.location.reload()}
+          className="mt-6 inline-flex items-center justify-center gap-2 rounded-xl bg-[#b6ff4d] px-5 py-3 text-sm font-medium text-black transition hover:bg-[#ceff85]"
+        >
+          <RefreshCcw size={16} />
+          重新检测
+        </button>
+      </section>
+    </main>
+  );
 }
