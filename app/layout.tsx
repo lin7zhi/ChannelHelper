@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -52,6 +53,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-CN" suppressHydrationWarning>
+      <head>
+        <Script
+          src="https://telegram.org/js/telegram-web-app.js?56"
+          strategy="beforeInteractive"
+        />
+      </head>
+
       <body
         className={`${geist.variable} ${geistMono.variable} font-sans`}
         suppressHydrationWarning
