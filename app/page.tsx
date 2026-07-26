@@ -26,7 +26,6 @@ import {
   LoaderCircle,
   Menu,
   MessageSquareText,
-  PanelsTopLeft,
   Plus,
   Radio,
   RefreshCcw,
@@ -113,7 +112,6 @@ type ModalKey =
   | "dir"
   | "buttonNew"
   | "buttonOld"
-  | "buttonMulti"
   | "backup"
   | "directory"
   | "replace"
@@ -635,15 +633,15 @@ return (
       </Modal>
 
       <Modal open={modal === "buttonNew"} onClose={() => setModal(null)} title="发送按钮消息">
-        <ButtonNewForm
+        <ButtonMessageForm
           channels={user.address_book}
           onSubmit={async (form, hasMedia) => {
             const result = hasMedia
-              ? await uploadApi<{ ok: boolean; msg?: string }>("/btn_new_media", form as FormData)
+              ? await uploadApi<{ ok: boolean; msg?: string }>("/btn_multi", form as FormData)
               : await requestApi<{ ok: boolean; msg?: string }>(
-                  "/btn_new",
+                  "/btn_multi",
                   "POST",
-                  form as Record<string, string>
+                  form as { ch_id: string; text: string; buttons: { text: string; url: string }[] }
                 );
 
             if (!result.ok) {
@@ -668,22 +666,6 @@ return (
             );
             if (!result.ok) return notify(result.msg || "操作失败", "error");
             notify("操作已完成");
-            setModal(null);
-          }}
-        />
-      </Modal>
-
-      <Modal open={modal === "buttonMulti"} onClose={() => setModal(null)} title="发送多按钮消息">
-        <MultiButtonForm
-          channels={user.address_book}
-          onSubmit={async (payload) => {
-            const result = await requestApi<{ ok: boolean; msg?: string }>(
-              "/btn_multi",
-              "POST",
-              payload
-            );
-            if (!result.ok) return notify(result.msg || "发送失败", "error");
-            notify("消息已发送");
             setModal(null);
           }}
         />
@@ -1100,7 +1082,7 @@ function ToolsPage({
   const tools = [
     {
       title: "发送按钮消息",
-      desc: "文本、媒体、格式化内容与单个跳转按钮。",
+      desc: "发送文本或媒体，可添加一个或多个跳转按钮。",
       icon: Send,
       color: "from-[#b6ff4d]/25 to-transparent",
       modal: "buttonNew" as ModalKey
@@ -1111,13 +1093,6 @@ function ToolsPage({
       icon: MessageSquareText,
       color: "from-[#9477ff]/25 to-transparent",
       modal: "buttonOld" as ModalKey
-    },
-    {
-      title: "多按钮消息",
-      desc: "创建含多个独立跳转入口的频道消息。",
-      icon: PanelsTopLeft,
-      color: "from-[#80caff]/25 to-transparent",
-      modal: "buttonMulti" as ModalKey
     },
     {
       title: "智能备份",
@@ -2212,20 +2187,19 @@ function DirectoryTaskForm({
   );
 }
 
-function ButtonNewForm({
+function ButtonMessageForm({
   channels,
   onSubmit
 }: {
   channels: Record<string, string>;
   onSubmit: (
-    form: FormData | Record<string, string>,
+    form: FormData | { ch_id: string; text: string; buttons: { text: string; url: string }[] },
     hasMedia: boolean
   ) => Promise<void>;
 }) {
   const [channelId, setChannelId] = useState("");
   const [text, setText] = useState("");
-  const [buttonText, setButtonText] = useState("");
-  const [url, setUrl] = useState("");
+  const [buttons, setButtons] = useState([{ text: "", url: "" }]);
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState("");
 
@@ -2249,13 +2223,13 @@ function ButtonNewForm({
       onSubmit={async (event) => {
         event.preventDefault();
         if (!channelId || (!text && !file)) return;
+        const validButtons = buttons.filter((button) => button.text.trim() && button.url.trim());
 
         if (file) {
           const form = new FormData();
           form.append("ch_id", channelId);
           form.append("text", text);
-          form.append("btn_text", buttonText);
-          form.append("url", url);
+          form.append("buttons", JSON.stringify(validButtons));
           form.append("media", file);
           await onSubmit(form, true);
           return;
@@ -2265,8 +2239,7 @@ function ButtonNewForm({
           {
             ch_id: channelId,
             text,
-            btn_text: buttonText,
-            url
+            buttons: validButtons
           },
           false
         );
@@ -2310,17 +2283,59 @@ function ButtonNewForm({
             />
           </Field>
 
-          <div className="grid gap-5 md:grid-cols-2">
-            <Field label="按钮文字（可选）">
-              <input className="input" value={buttonText} onChange={(e) => setButtonText(e.target.value)} placeholder="点击打开" />
-            </Field>
-            <Field label="跳转 URL（可选）">
-              <input className="input" type="url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://…" />
-            </Field>
+          <div>
+            <div className="mb-3 flex items-baseline justify-between gap-3">
+              <p className="text-xs font-medium text-zinc-300">按钮列表（可选）</p>
+              <p className="text-[11px] text-zinc-500">每行一个按钮</p>
+            </div>
+            <div className="space-y-3">
+              {buttons.map((button, index) => (
+                <div key={index} className="flex gap-2">
+                  <input
+                    className="input"
+                    value={button.text}
+                    onChange={(e) =>
+                      setButtons((prev) =>
+                        prev.map((item, i) => (i === index ? { ...item, text: e.target.value } : item))
+                      )
+                    }
+                    placeholder="按钮文字"
+                  />
+                  <input
+                    className="input"
+                    type="url"
+                    value={button.url}
+                    onChange={(e) =>
+                      setButtons((prev) =>
+                        prev.map((item, i) => (i === index ? { ...item, url: e.target.value } : item))
+                      )
+                    }
+                    placeholder="https://…"
+                  />
+                  {buttons.length > 1 && (
+                    <button
+                      type="button"
+                      className="rounded-xl px-3 text-zinc-500 hover:text-[#ff7464]"
+                      onClick={() => setButtons((prev) => prev.filter((_, i) => i !== index))}
+                      aria-label={`删除按钮 ${index + 1}`}
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={() => setButtons((prev) => [...prev, { text: "", url: "" }])}
+              className="mt-3 flex items-center gap-2 text-xs text-[#b6ff4d]"
+            >
+              <Plus size={15} /> 添加按钮
+            </button>
           </div>
         </div>
 
-        <ButtonMessagePreview text={text} buttonText={buttonText} url={url} file={file} previewUrl={previewUrl} />
+        <ButtonMessagePreview text={text} buttons={buttons} file={file} previewUrl={previewUrl} />
       </div>
 
       <ActionButton type="submit" icon={<Send size={17} />}>
@@ -2332,14 +2347,12 @@ function ButtonNewForm({
 
 function ButtonMessagePreview({
   text,
-  buttonText,
-  url,
+  buttons,
   file,
   previewUrl
 }: {
   text: string;
-  buttonText: string;
-  url: string;
+  buttons: { text: string; url: string }[];
   file: File | null;
   previewUrl: string;
 }) {
@@ -2365,11 +2378,11 @@ function ButtonMessagePreview({
           <img src={previewUrl} alt="GIF 预览" className="max-h-56 w-full object-cover" />
         )}
         <div className="whitespace-pre-wrap break-words px-3 py-3 text-sm leading-6 text-white">{renderHtml(text)}</div>
-        {buttonText && (
-          <a href={url || "#"} target="_blank" rel="noreferrer" className="mx-3 mb-3 block rounded-lg bg-[#2a9df4]/25 px-3 py-2 text-center text-sm text-[#70c7ff]">
-            {buttonText}
+        {buttons.filter((button) => button.text).map((button, index) => (
+          <a key={index} href={button.url || "#"} target="_blank" rel="noreferrer" className="mx-3 mb-2 block rounded-lg bg-[#2a9df4]/25 px-3 py-2 text-center text-sm text-[#70c7ff]">
+            {button.text}
           </a>
-        )}
+        ))}
       </div>
       {file && <p className="mt-2 truncate text-[10px] text-zinc-500">{file.name}</p>}
     </div>
@@ -2411,105 +2424,6 @@ function OldButtonForm({
       </Field>
       <ActionButton type="submit" icon={<Settings2 size={17} />}>
         更新消息按钮
-      </ActionButton>
-    </form>
-  );
-}
-
-function MultiButtonForm({
-  channels,
-  onSubmit
-}: {
-  channels: Record<string, string>;
-  onSubmit: (payload: { ch_id: string; text: string; buttons: { text: string; url: string }[] }) => Promise<void>;
-}) {
-  const [channelId, setChannelId] = useState("");
-  const [text, setText] = useState("");
-  const [buttons, setButtons] = useState([{ text: "", url: "" }]);
-
-  return (
-    <form
-      className="space-y-5"
-      onSubmit={async (event) => {
-        event.preventDefault();
-        const valid = buttons.filter((button) => button.text && button.url);
-        if (!channelId || !text || !valid.length) return;
-        await onSubmit({ ch_id: channelId, text, buttons: valid });
-      }}
-    >
-      <Field label="目标频道">
-        <ChannelPicker channels={channels} value={channelId} onChange={setChannelId} />
-      </Field>
-      <Field label="消息正文">
-        <textarea className="input min-h-28" value={text} onChange={(e) => setText(e.target.value)} placeholder="支持 Telegram HTML 格式" />
-      </Field>
-
-      <div>
-        <p className="mb-3 text-xs font-medium text-zinc-300">按钮列表</p>
-        <div className="space-y-3">
-          {buttons.map((button, index) => (
-            <div key={index} className="flex gap-2">
-              <input
-                className="input"
-                value={button.text}
-                onChange={(e) =>
-                  setButtons((prev) =>
-                    prev.map((item, i) => (i === index ? { ...item, text: e.target.value } : item))
-                  )
-                }
-                placeholder="按钮文字"
-              />
-              <input
-                className="input"
-                value={button.url}
-                onChange={(e) =>
-                  setButtons((prev) =>
-                    prev.map((item, i) => (i === index ? { ...item, url: e.target.value } : item))
-                  )
-                }
-                placeholder="https://…"
-              />
-              {buttons.length > 1 && (
-                <button
-                  type="button"
-                  className="rounded-xl px-3 text-zinc-500 hover:text-[#ff7464]"
-                  onClick={() => setButtons((prev) => prev.filter((_, i) => i !== index))}
-                >
-                  <Trash2 size={16} />
-                </button>
-              )}
-            </div>
-          ))}
-        </div>
-
-        <button
-          type="button"
-          onClick={() => setButtons((prev) => [...prev, { text: "", url: "" }])}
-          className="mt-3 flex items-center gap-2 text-xs text-[#b6ff4d]"
-        >
-          <Plus size={15} /> 添加按钮行
-        </button>
-      </div>
-
-      <div className="rounded-2xl border border-white/10 bg-[#0b1016] p-3">
-        <div className="mb-3 flex items-center justify-between">
-          <span className="font-mono text-[10px] tracking-[0.16em] text-zinc-500">LIVE PREVIEW</span>
-          <span className="text-[10px] text-[#b6ff4d]">多按钮消息</span>
-        </div>
-        <div className="rounded-xl bg-[#182533] px-3 py-3 text-sm leading-6 text-white">
-          <div className="whitespace-pre-wrap break-words" dangerouslySetInnerHTML={{ __html: text || "消息正文预览" }} />
-          <div className="mt-3 grid gap-2">
-            {buttons.filter((button) => button.text).map((button, index) => (
-              <a key={index} href={button.url || "#"} target="_blank" rel="noreferrer" className="rounded-lg bg-[#2a9df4]/25 px-3 py-2 text-center text-sm text-[#70c7ff]">
-                {button.text}
-              </a>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <ActionButton type="submit" icon={<PanelsTopLeft size={17} />}>
-        发送多按钮消息
       </ActionButton>
     </form>
   );
