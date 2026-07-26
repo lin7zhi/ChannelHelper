@@ -1194,6 +1194,7 @@ function TasksPage({
   dirs,
   channels,
   openCreate,
+  openEdit,
   removeStat,
   removeDir
 }: {
