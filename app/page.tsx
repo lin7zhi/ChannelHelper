@@ -85,7 +85,11 @@ type DirTask = {
 type MemberMonitor = {
   channel_id: string;
   started_at: number;
-  members: { id: number; username: string; first_name: string; last_name: string; joined_at: number }[];
+  interval: number;
+  last_run: number;
+  member_count: number;
+  remote_path: string;
+  last_error?: string;
 };
 
 type UserData = {
@@ -632,16 +636,15 @@ return (
       </Modal>
 
       <Modal open={modal === "buttonOld"} onClose={() => setModal(null)} title="修改旧消息按钮">
-        <OldButtonForm
+        <ButtonMessageForm
           channels={user.address_book}
-          onSubmit={async (payload) => {
-            const result = await requestApi<{ ok: boolean; msg?: string }>(
-              "/btn_old",
-              "POST",
-              payload
-            );
+          editMode
+          onSubmit={async (form, hasMedia) => {
+            const result = hasMedia
+              ? await uploadApi<{ ok: boolean; msg?: string }>("/btn_old", form as FormData)
+              : await requestApi<{ ok: boolean; msg?: string }>("/btn_old", "POST", form);
             if (!result.ok) return notify(result.msg || "操作失败", "error");
-            notify("操作已完成");
+            notify("消息已更新");
             setModal(null);
           }}
         />
@@ -700,31 +703,21 @@ return (
       </Modal>
 
       <Modal open={modal === "members"} onClose={() => setModal(null)} title="监控频道成员">
-        <SingleChannelActionForm
+        <MemberMonitorForm
           channels={user.address_book}
-          label="频道或群组"
-          buttonText="开始监控"
-          icon={<UsersRound size={17} />}
-          onSubmit={async (channelId) => {
+          onSubmit={async (channelId, interval) => {
             const result = await requestApi<{ ok: boolean; msg?: string }>(
               "/member_monitors",
               "POST",
-              { ch_id: channelId }
+              { ch_id: channelId, interval }
             );
             if (!result.ok) return notify(result.msg || "任务启动失败", "error");
-            notify("已开始监控新加入的频道成员");
-            setModal(null);
+            notify("成员定时备份任务已创建");
             refresh();
           }}
         />
         {!!user.member_monitors.length && <div className="mt-5 space-y-2">
-          {user.member_monitors.map((item) => <div key={item.channel_id} className="flex items-center justify-between rounded-xl border border-white/10 p-3 text-xs">
-            <span>{channelName(item.channel_id, user.address_book)} · 已记录 {item.members.length} 人</span>
-            <button className="text-[#ff7464]" onClick={async () => {
-              const result = await requestApi<{ ok: boolean; user?: UserData }>(`/member_monitors/${encodeURIComponent(item.channel_id)}`, "DELETE");
-              if (updateFromResponse(result)) refresh();
-            }}>停止</button>
-          </div>)}
+          {user.member_monitors.map((item) => <MemberMonitorCard key={item.channel_id} item={item} channels={user.address_book} notify={notify} refresh={refresh} updateFromResponse={updateFromResponse} />)}
         </div>}
       </Modal>
 
@@ -1306,6 +1299,14 @@ function TasksPage({
 
                 <div className="mt-4 rounded-xl border border-white/10 bg-black/15 p-3 text-xs text-zinc-400">
                   <p>扫描源：{channelName(task.scan_id, channels)}</p>
+                  <div className="mt-3 space-y-2 border-t border-white/10 pt-3">
+                    <p className="text-zinc-500">发布目标</p>
+                    {task.targets?.map((target, targetIndex) => (
+                      <p key={`${target.channel_id}-${target.msg_id}-${targetIndex}`}>
+                        {channelName(target.channel_id, channels)} · 消息 ID：<span className="font-mono text-zinc-200">{target.msg_id}</span>
+                      </p>
+                    ))}
+                  </div>
                   <button
                     type="button"
                     className="mt-2 flex w-full items-center justify-between text-left transition hover:text-white"
@@ -1364,6 +1365,7 @@ function TaskEditForm({
   const stat = kind === "stat" ? (task as StatTask) : null;
   const dir = kind === "dir" ? (task as DirTask) : null;
   const [field, setField] = useState(kind === "stat" ? "task_name" : "interval");
+  const [targetIndex, setTargetIndex] = useState(0);
   const [value, setValue] = useState(() => {
     if (kind === "stat") return stat?.task_name || "";
     return String(dir?.interval || 15);
@@ -1382,10 +1384,14 @@ function TaskEditForm({
       );
     }
     if (kind === "dir" && dir) {
+      if (field === "target_msg_id") {
+        setValue(dir.targets[targetIndex]?.msg_id || "");
+        return;
+      }
       const current = dir[field as keyof DirTask];
       setValue(Array.isArray(current) ? current.join(" ") : String(current ?? ""));
     }
-  }, [field, kind, stat, dir]);
+  }, [field, kind, stat, dir, targetIndex]);
 
   const fieldOptions = kind === "stat"
     ? [
@@ -1399,6 +1405,7 @@ function TaskEditForm({
     : [
         ["interval", "扫描频率（分钟）"], ["add_blacklist", "追加屏蔽标签"],
         ["rm_blacklist", "移除屏蔽标签"], ["add_target", "添加发布目标 JSON"],
+        ["target_msg_id", "修改发布目标消息 ID"],
         ["rm_target", "移除发布目标索引"]
       ];
 
@@ -1414,7 +1421,10 @@ function TaskEditForm({
       } catch { return; }
     }
     setSubmitting(true);
-    await onSubmit(field, value.trim());
+    const submittedValue = field === "target_msg_id"
+      ? JSON.stringify({ index: Number(targetIndex), msg_id: value.trim() })
+      : value.trim();
+    await onSubmit(field, submittedValue);
     setSubmitting(false);
   };
 
@@ -1444,7 +1454,18 @@ function TaskEditForm({
           )}
         </div>
       )}
-      {field === "channel_id" && stat ? (
+      {field === "target_msg_id" && dir ? (
+        <div className="space-y-4">
+          <Field label="发布目标">
+            <select className="input" value={targetIndex} onChange={(event) => {
+              const index = Number(event.target.value); setTargetIndex(index); setValue(dir.targets[index]?.msg_id || "");
+            }}>
+              {dir.targets.map((target, index) => <option key={`${target.channel_id}-${index}`} value={index}>{channelName(target.channel_id, channels)} · 当前 ID {target.msg_id}</option>)}
+            </select>
+          </Field>
+          <Field label="新消息 ID 或链接"><input className="input" value={value} onChange={(event) => setValue(event.target.value)} /></Field>
+        </div>
+      ) : field === "channel_id" && stat ? (
         <Field label="新值"><ChannelPicker channels={channels} value={value} onChange={setValue} /></Field>
       ) : field === "scan_id" && dir ? (
         <Field label="新值"><ChannelPicker channels={channels} value={value} onChange={setValue} /></Field>
@@ -2144,15 +2165,18 @@ function DirectoryTaskForm({
 
 function ButtonMessageForm({
   channels,
-  onSubmit
+  onSubmit,
+  editMode = false
 }: {
   channels: Record<string, string>;
   onSubmit: (
-    form: FormData | { ch_id: string; text: string; buttons: { text: string; url: string }[] },
+    form: FormData | { ch_id: string; msg_id?: string; text: string; buttons: { text: string; url: string }[] },
     hasMedia: boolean
   ) => Promise<void>;
+  editMode?: boolean;
 }) {
   const [channelId, setChannelId] = useState("");
+  const [msgId, setMsgId] = useState("");
   const [text, setText] = useState("");
   const [buttons, setButtons] = useState([{ text: "", url: "" }]);
   const [file, setFile] = useState<File | null>(null);
@@ -2177,12 +2201,13 @@ function ButtonMessageForm({
       className="space-y-5"
       onSubmit={async (event) => {
         event.preventDefault();
-        if (!channelId || (!text && !file)) return;
+        if (!channelId || (editMode && !msgId) || (!editMode && !text && !file)) return;
         const validButtons = buttons.filter((button) => button.text.trim() && button.url.trim());
 
         if (file) {
           const form = new FormData();
           form.append("ch_id", channelId);
+          if (editMode) form.append("msg_id", msgId);
           form.append("text", text);
           form.append("buttons", JSON.stringify(validButtons));
           form.append("media", file);
@@ -2193,6 +2218,7 @@ function ButtonMessageForm({
         await onSubmit(
           {
             ch_id: channelId,
+            ...(editMode ? { msg_id: msgId } : {}),
             text,
             buttons: validButtons
           },
@@ -2206,6 +2232,10 @@ function ButtonMessageForm({
             <ChannelPicker channels={channels} value={channelId} onChange={setChannelId} />
           </Field>
 
+          {editMode && <Field label="消息 ID 或消息链接">
+            <input className="input" value={msgId} onChange={(event) => setMsgId(event.target.value)} placeholder="311 或消息链接" />
+          </Field>}
+
           <Field label="消息正文" hint="后端以 Telegram HTML 模式发送。">
             <div className="mb-2 flex flex-wrap gap-2">
               {[
@@ -2214,6 +2244,7 @@ function ButtonMessageForm({
                 ["下划线", "u"],
                 ["删除线", "s"],
                 ["代码", "code"],
+                ["代码块", "pre"],
                 ["引用", "blockquote"]
               ].map(([label, tag]) => (
                 <button
@@ -2233,7 +2264,7 @@ function ButtonMessageForm({
             <input
               className="block w-full rounded-xl border border-dashed border-white/15 bg-white/[0.03] p-3 text-xs text-zinc-400 file:mr-4 file:rounded-lg file:border-0 file:bg-[#b6ff4d] file:px-3 file:py-2 file:text-xs file:font-medium file:text-black"
               type="file"
-              accept="image/*,video/*,.gif"
+              accept="image/*,video/*,.gif,.pdf,.zip"
               onChange={(e) => setFile(e.target.files?.[0] || null)}
             />
           </Field>
@@ -2294,7 +2325,7 @@ function ButtonMessageForm({
       </div>
 
       <ActionButton type="submit" icon={<Send size={17} />}>
-        发送到频道
+        {editMode ? "更新频道消息" : "发送到频道"}
       </ActionButton>
     </form>
   );
@@ -2332,7 +2363,7 @@ function ButtonMessagePreview({
         {file && previewUrl && (file.type === "image/gif" || file.name.toLowerCase().endsWith(".gif")) && (
           <img src={previewUrl} alt="GIF 预览" className="max-h-56 w-full object-cover" />
         )}
-        <div className="whitespace-pre-wrap break-words px-3 py-3 text-sm leading-6 text-white">{renderHtml(text)}</div>
+        <div className="whitespace-pre-wrap break-words px-3 py-3 text-sm leading-6 text-white [&_blockquote]:my-2 [&_blockquote]:border-l-4 [&_blockquote]:border-[#70c7ff]/60 [&_blockquote]:bg-black/15 [&_blockquote]:px-3 [&_blockquote]:py-1 [&_code]:rounded [&_code]:bg-black/35 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-[#ffd479] [&_pre]:my-2 [&_pre]:overflow-x-auto [&_pre]:rounded-lg [&_pre]:bg-black/45 [&_pre]:p-3">{renderHtml(text)}</div>
         {buttons.filter((button) => button.text).map((button, index) => (
           <a key={index} href={button.url || "#"} target="_blank" rel="noreferrer" className="mx-3 mb-2 block rounded-lg bg-[#2a9df4]/25 px-3 py-2 text-center text-sm text-[#70c7ff]">
             {button.text}
@@ -2530,6 +2561,60 @@ function SingleChannelActionForm({
       </ActionButton>
     </form>
   );
+}
+
+function MemberMonitorForm({
+  channels,
+  onSubmit
+}: {
+  channels: Record<string, string>;
+  onSubmit: (channelId: string, interval: number) => Promise<void>;
+}) {
+  const [channelId, setChannelId] = useState("");
+  const [interval, setInterval] = useState("60");
+  return <form className="space-y-5" onSubmit={async (event) => {
+    event.preventDefault();
+    if (!channelId || !/^\d+$/.test(interval) || Number(interval) < 1) return;
+    await onSubmit(channelId, Number(interval));
+  }}>
+    <Field label="频道或群组"><ChannelPicker channels={channels} value={channelId} onChange={setChannelId} /></Field>
+    <Field label="检测间隔（分钟）" hint="每次检测会覆盖该频道在 WebDAV 上的独立 CSV 备份。">
+      <input className="input" type="number" min="1" value={interval} onChange={(event) => setInterval(event.target.value)} />
+    </Field>
+    <ActionButton type="submit" icon={<UsersRound size={17} />}>创建成员备份任务</ActionButton>
+  </form>;
+}
+
+function MemberMonitorCard({ item, channels, notify, refresh, updateFromResponse }: {
+  item: MemberMonitor;
+  channels: Record<string, string>;
+  notify: (text: string, type?: "ok" | "error") => void;
+  refresh: () => Promise<void>;
+  updateFromResponse: (result: { ok: boolean; user?: UserData; msg?: string }) => boolean;
+}) {
+  const [interval, setInterval] = useState(String(item.interval || 60));
+  return <div className="rounded-xl border border-white/10 p-3 text-xs">
+    <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center"><div>
+      <p className="text-zinc-200">{channelName(item.channel_id, channels)}</p>
+      <p className="mt-1 text-zinc-500">{item.member_count || 0} 人{item.last_run ? ` · ${new Date(item.last_run * 1000).toLocaleString()}` : " · 等待首次备份"}</p>
+      {item.last_error && <p className="mt-1 text-[#ff7464]">{item.last_error}</p>}
+    </div><div className="flex flex-wrap items-center gap-2">
+      <input className="input !w-20 !px-2 !py-1.5" type="number" min="1" aria-label="检测间隔（分钟）" value={interval} onChange={(event) => setInterval(event.target.value)} />
+      <span className="text-zinc-500">分钟</span>
+      <button className="text-[#b6ff4d]" onClick={async () => {
+        const result = await requestApi<{ ok: boolean; user?: UserData; msg?: string }>(`/member_monitors/${encodeURIComponent(item.channel_id)}`, "PUT", { interval: Number(interval) });
+        if (updateFromResponse(result)) { notify("检测间隔已更新"); refresh(); }
+      }}>保存</button>
+      <button className="text-[#70c7ff]" onClick={async () => {
+        const result = await requestApi<{ ok: boolean; msg?: string }>(`/member_monitors/${encodeURIComponent(item.channel_id)}/download`, "POST");
+        notify(result.ok ? "文件将由机器人发送" : result.msg || "下载失败", result.ok ? "ok" : "error");
+      }}>下载</button>
+      <button className="text-[#ff7464]" onClick={async () => {
+        const result = await requestApi<{ ok: boolean; user?: UserData }>(`/member_monitors/${encodeURIComponent(item.channel_id)}`, "DELETE");
+        if (updateFromResponse(result)) refresh();
+      }}>停止</button>
+    </div></div>
+  </div>;
 }
 
 function ReplaceTagForm({
