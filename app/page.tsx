@@ -1218,6 +1218,8 @@ function TasksPage({
   removeStat: (index: number) => void;
   removeDir: (index: number) => void;
 }) {
+  const [expandedBlacklist, setExpandedBlacklist] = useState<number | null>(null);
+
   return (
     <PagePanel
       eyebrow="AUTOMATION PIPELINES"
@@ -1283,7 +1285,41 @@ function TasksPage({
                 <div className="mt-4 rounded-xl border border-white/10 bg-black/15 p-3 text-xs text-zinc-400">
                   <p>频道：{channelName(task.channel_id, channels)}</p>
                   <p className="mt-2">消息：<span className="font-mono text-zinc-300">{task.msg_id}</span></p>
-                  <p className="mt-2">屏蔽名单：{task.stats_blacklist?.length || 0} 项</p>
+                  <button
+                    type="button"
+                    className="mt-2 flex w-full items-center justify-between text-left transition hover:text-white"
+                    onClick={() =>
+                      setExpandedBlacklist((current) => (current === index ? null : index))
+                    }
+                    aria-expanded={expandedBlacklist === index}
+                  >
+                    <span>屏蔽名单：{task.stats_blacklist?.length || 0} 项</span>
+                    <ChevronRight
+                      size={15}
+                      className={clsx(
+                        "transition-transform",
+                        expandedBlacklist === index && "rotate-90"
+                      )}
+                    />
+                  </button>
+                  {expandedBlacklist === index && (
+                    <div className="mt-3 border-t border-white/10 pt-3">
+                      {task.stats_blacklist?.length ? (
+                        <div className="flex flex-wrap gap-2">
+                          {task.stats_blacklist.map((name, blacklistIndex) => (
+                            <span
+                              key={`${name}-${blacklistIndex}`}
+                              className="rounded-lg bg-[#9477ff]/10 px-2 py-1 text-xs text-[#d5c9ff]"
+                            >
+                              {name}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <p>暂无屏蔽对象</p>
+                      )}
+                    </div>
+                  )}
                 </div>
               </article>
             ))}
@@ -1362,7 +1398,13 @@ function TaskEditForm({
   useEffect(() => {
     if (kind === "stat" && stat) {
       const current = stat[field as keyof StatTask];
-      setValue(Array.isArray(current) ? current.join(" ") : String(current ?? ""));
+      setValue(
+        ["add_stats_bl", "rm_stats_bl"].includes(field)
+          ? ""
+          : Array.isArray(current)
+            ? current.join(" ")
+            : String(current ?? "")
+      );
     }
     if (kind === "dir" && dir) {
       const current = dir[field as keyof DirTask];
@@ -1408,6 +1450,25 @@ function TaskEditForm({
           {fieldOptions.map(([key, label]) => <option key={key} value={key}>{label}</option>)}
         </select>
       </Field>
+      {stat && (
+        <div className="rounded-xl border border-white/10 bg-black/15 p-3">
+          <p className="text-xs text-zinc-400">当前屏蔽名单（{stat.stats_blacklist?.length || 0} 项）</p>
+          {stat.stats_blacklist?.length ? (
+            <div className="mt-2 flex flex-wrap gap-2">
+              {stat.stats_blacklist.map((name, index) => (
+                <span
+                  key={`${name}-${index}`}
+                  className="rounded-lg bg-[#9477ff]/10 px-2 py-1 text-xs text-[#d5c9ff]"
+                >
+                  {name}
+                </span>
+              ))}
+            </div>
+          ) : (
+            <p className="mt-2 text-xs text-zinc-500">暂无屏蔽对象</p>
+          )}
+        </div>
+      )}
       {field === "channel_id" && stat ? (
         <Field label="新值"><ChannelPicker channels={channels} value={value} onChange={setValue} /></Field>
       ) : field === "scan_id" && dir ? (
