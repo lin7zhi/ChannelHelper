@@ -351,7 +351,7 @@ return (
 
         <section className="min-w-0">
           <header className="glass mb-5 flex items-center justify-between rounded-[26px] px-4 py-3 md:px-6">
-            <div className="flex items-center gap-3">
+            <div className="flex shrink-0 items-center gap-3">
               <button
                 className="grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/[0.04] lg:hidden"
                 onClick={() => setMenuOpen(true)}
@@ -379,13 +379,17 @@ return (
                 <RefreshCcw size={17} className={loading ? "animate-spin" : ""} />
               </button>
 
-              <div className="hidden items-center gap-3 border-l border-white/10 pl-4 sm:flex">
+              <div className="flex items-center gap-3 border-l border-white/10 pl-3 sm:pl-4">
                 <div className="text-right">
-                  <p className="max-w-32 truncate text-sm font-medium">
-                    {telegramUser?.first_name || "访客模式"}
+                  <p className="max-w-24 truncate text-sm font-medium sm:max-w-32">
+                    {telegramDisplayName(telegramUser)}
                   </p>
                   <p className="font-mono text-[10px] text-zinc-500">
-                    {telegramUser ? `ID ${telegramUser.id}` : "TELEGRAM WEB APP"}
+                    {telegramUser?.username
+                      ? `@${telegramUser.username}`
+                      : telegramUser
+                        ? `ID ${telegramUser.id}`
+                        : "TELEGRAM WEB APP"}
                   </p>
                 </div>
                 <Avatar user={telegramUser} />
@@ -828,6 +832,12 @@ function Avatar({
       {user?.first_name?.slice(0, 1) || "N"}
     </div>
   );
+}
+
+function telegramDisplayName(user?: TelegramUser) {
+  if (!user) return "访客模式";
+
+  return [user.first_name, user.last_name].filter(Boolean).join(" ") || user.username || "Telegram 用户";
 }
 
 function NavButton({

@@ -56,7 +56,21 @@ export function getTelegramInitData(): string {
 }
 
 export function getTelegramUser(): TelegramUser | undefined {
-  return getTelegramWebApp()?.initDataUnsafe?.user;
+  const webApp = getTelegramWebApp();
+  const unsafeUser = webApp?.initDataUnsafe?.user;
+
+  if (unsafeUser) {
+    return unsafeUser;
+  }
+
+  // Some Telegram clients populate initData before initDataUnsafe.  This is
+  // display-only data; the backend must continue validating initData itself.
+  try {
+    const encodedUser = new URLSearchParams(webApp?.initData || "").get("user");
+    return encodedUser ? (JSON.parse(encodedUser) as TelegramUser) : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 export function isTelegramWebApp(): boolean {
@@ -80,4 +94,3 @@ export function initializeTelegramWebApp(): TelegramWebApp | null {
 
   return tg;
 }
-
