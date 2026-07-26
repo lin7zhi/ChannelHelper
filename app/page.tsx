@@ -1808,20 +1808,21 @@ function Modal({
     <AnimatePresence>
       {open && (
         <motion.div
-          className="fixed inset-0 z-[100] flex items-end justify-center bg-black/70 p-0 backdrop-blur-md md:items-center md:p-6"
+          className="modal-backdrop fixed inset-0 z-[100] flex items-end justify-center bg-black/70 p-0 backdrop-blur-md md:items-center md:p-6"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
+          transition={{ duration: 0.18, ease: "easeOut" }}
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) onClose();
           }}
         >
           <motion.div
-            className="glass max-h-[88dvh] w-full max-w-2xl overflow-y-auto rounded-t-[22px] p-4 md:rounded-[28px] md:p-7"
-            initial={{ y: 50, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 50, opacity: 0 }}
-            transition={{ type: "spring", damping: 28, stiffness: 310 }}
+            className="modal-sheet glass max-h-[88dvh] w-full max-w-2xl overflow-y-auto rounded-t-[22px] p-4 md:rounded-[28px] md:p-7"
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{ type: "tween", duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
           >
             <div className="mb-7 flex items-center justify-between">
               <div>

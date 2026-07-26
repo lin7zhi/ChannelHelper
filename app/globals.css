@@ -229,6 +229,24 @@ main {
   -webkit-backface-visibility: hidden;
 }
 
+/*
+ * 底部弹窗只在合成层上移动。将滚动内容和遮罩的绘制隔离开，
+ * 避免弹出时重绘整页，尤其是 Telegram 的低性能 WebView。
+ */
+.modal-backdrop {
+  will-change: opacity;
+  contain: paint;
+}
+
+.modal-sheet {
+  will-change: transform;
+  contain: paint;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .page-transition {
     contain: paint;
