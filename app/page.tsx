@@ -1219,6 +1219,7 @@ function TasksPage({
   removeDir: (index: number) => void;
 }) {
   const [expandedBlacklist, setExpandedBlacklist] = useState<number | null>(null);
+  const [expandedDirBlacklist, setExpandedDirBlacklist] = useState<number | null>(null);
 
   return (
     <PagePanel
@@ -1357,15 +1358,50 @@ function TasksPage({
                   </div>
                 </div>
 
-                <div className="mt-6 grid grid-cols-3 gap-3">
+                <div className="mt-6 grid grid-cols-2 gap-3">
                   <DataCell label="扫描频率" value={`${task.interval || 15} 分钟`} />
                   <DataCell label="已收录标签" value={`${task.tags_cache?.length || 0} 个`} />
                   <DataCell label="发布目标" value={`${task.targets?.length || 0} 个`} />
+                  <DataCell label="屏蔽标签" value={`${task.blacklist?.length || 0} 个`} />
                 </div>
 
                 <div className="mt-4 rounded-xl border border-white/10 bg-black/15 p-3 text-xs text-zinc-400">
                   <p>扫描源：{channelName(task.scan_id, channels)}</p>
-                  <p className="mt-2">屏蔽标签：{task.blacklist?.join("、") || "无"}</p>
+                  <button
+                    type="button"
+                    className="mt-2 flex w-full items-center justify-between text-left transition hover:text-white"
+                    onClick={() =>
+                      setExpandedDirBlacklist((current) => (current === index ? null : index))
+                    }
+                    aria-expanded={expandedDirBlacklist === index}
+                  >
+                    <span>屏蔽标签：{task.blacklist?.length || 0} 项</span>
+                    <ChevronRight
+                      size={15}
+                      className={clsx(
+                        "transition-transform",
+                        expandedDirBlacklist === index && "rotate-90"
+                      )}
+                    />
+                  </button>
+                  {expandedDirBlacklist === index && (
+                    <div className="mt-3 border-t border-white/10 pt-3">
+                      {task.blacklist?.length ? (
+                        <div className="flex flex-wrap gap-2">
+                          {task.blacklist.map((tag, blacklistIndex) => (
+                            <span
+                              key={`${tag}-${blacklistIndex}`}
+                              className="rounded-lg bg-[#b6ff4d]/10 px-2 py-1 text-xs text-[#d9ff9f]"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <p>暂无屏蔽标签</p>
+                      )}
+                    </div>
+                  )}
                 </div>
               </article>
             ))}
