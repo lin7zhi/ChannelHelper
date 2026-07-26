@@ -36,7 +36,7 @@ import {
   Upload,
   UsersRound,
   X,
-  Zap
+  Zap,
 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { FormEvent, ReactNode, useEffect, useMemo, useState } from "react";
@@ -45,9 +45,8 @@ import {
   getTelegramInitData,
   getTelegramUser,
   initializeTelegramWebApp,
-  type TelegramUser
+  type TelegramUser,
 } from "@/lib/telegram";
-
 
 type Target = {
   channel_id: string;
@@ -134,7 +133,7 @@ const emptyUser: UserData = {
   stats_tasks: [],
   dir_tasks: [],
   address_book: {},
-  member_monitors: []
+  member_monitors: [],
 };
 
 const nav = [
@@ -142,7 +141,7 @@ const nav = [
   { key: "sync" as PageKey, label: "同步矩阵", icon: FolderSync },
   { key: "tools" as PageKey, label: "工具集", icon: Boxes },
   { key: "tasks" as PageKey, label: "自动任务", icon: Activity },
-  { key: "channels" as PageKey, label: "频道簿", icon: BookMarked }
+  { key: "channels" as PageKey, label: "频道簿", icon: BookMarked },
 ];
 
 function getInitData() {
@@ -152,15 +151,15 @@ function getInitData() {
 async function requestApi<T>(
   path: string,
   method = "GET",
-  body?: unknown
+  body?: unknown,
 ): Promise<T> {
   const response = await fetch(`/backend${path}`, {
     method,
     headers: {
       "Content-Type": "application/json",
-      "X-Init-Data": getInitData()
+      "X-Init-Data": getInitData(),
     },
-    body: body ? JSON.stringify(body) : undefined
+    body: body ? JSON.stringify(body) : undefined,
   });
 
   return response.json() as Promise<T>;
@@ -170,9 +169,9 @@ async function uploadApi<T>(path: string, body: FormData): Promise<T> {
   const response = await fetch(`/backend${path}`, {
     method: "POST",
     headers: {
-      "X-Init-Data": getInitData()
+      "X-Init-Data": getInitData(),
     },
-    body
+    body,
   });
 
   return response.json() as Promise<T>;
@@ -195,7 +194,7 @@ function useTelegram() {
 
         if (!tg.initData) {
           console.warn(
-            "Telegram WebApp 已加载，但 initData 为空。请确认页面是在 Telegram 内打开。"
+            "Telegram WebApp 已加载，但 initData 为空。请确认页面是在 Telegram 内打开。",
           );
         }
 
@@ -224,17 +223,12 @@ function useTelegram() {
   return {
     telegramUser,
     telegramReady,
-    telegramInitData: getTelegramInitData()
+    telegramInitData: getTelegramInitData(),
   };
 }
 
 export default function Home() {
-const {
-  telegramUser,
-  telegramReady,
-  telegramInitData
-} = useTelegram();
-
+  const { telegramUser, telegramReady, telegramInitData } = useTelegram();
 
   const [activePage, setActivePage] = useState<PageKey>("overview");
   const [activeTaskTab, setActiveTaskTab] = useState<"stats" | "dirs">("stats");
@@ -244,15 +238,18 @@ const {
   const [editGroupIndex, setEditGroupIndex] = useState<number | null>(null);
   const [editChannelId, setEditChannelId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [toast, setToast] = useState<{ text: string; type: "ok" | "error" } | null>(
-    null
-  );
+  const [toast, setToast] = useState<{
+    text: string;
+    type: "ok" | "error";
+  } | null>(null);
 
   const user = data?.user ? { ...emptyUser, ...data.user } : emptyUser;
 
   const notify = (text: string, type: "ok" | "error" = "ok") => {
     setToast({ text, type });
-    window.Telegram?.WebApp?.HapticFeedback?.impactOccurred(type === "ok" ? "light" : "medium");
+    window.Telegram?.WebApp?.HapticFeedback?.impactOccurred(
+      type === "ok" ? "light" : "medium",
+    );
     window.setTimeout(() => setToast(null), 3200);
   };
 
@@ -273,15 +270,18 @@ const {
   };
 
   useEffect(() => {
-  if (!telegramReady) {
-    return;
-  }
+    if (!telegramReady) {
+      return;
+    }
 
-  refresh();
-}, [telegramReady]);
+    refresh();
+  }, [telegramReady]);
 
-
-  const updateFromResponse = (result: { ok: boolean; user?: UserData; msg?: string }) => {
+  const updateFromResponse = (result: {
+    ok: boolean;
+    user?: UserData;
+    msg?: string;
+  }) => {
     if (!result.ok) {
       notify(result.msg || "操作未完成", "error");
       return false;
@@ -292,9 +292,9 @@ const {
         prev
           ? {
               ...prev,
-              user: result.user!
+              user: result.user!,
             }
-          : prev
+          : prev,
       );
     }
 
@@ -314,15 +314,15 @@ const {
 
   const title = useMemo(
     () => nav.find((item) => item.key === activePage)?.label || "控制台",
-    [activePage]
+    [activePage],
   );
 
   if (telegramReady && !telegramInitData) {
-  return <TelegramOnlyScreen />;
-}
+    return <TelegramOnlyScreen />;
+  }
 
-return (
-  <main className="relative min-h-screen px-3 pb-28 pt-3 sm:px-5 md:px-8 md:py-7">
+  return (
+    <main className="relative min-h-screen px-3 pb-28 pt-3 sm:px-5 md:px-8 md:py-7">
       <AmbientOrbs />
 
       <div className="mx-auto grid max-w-[1560px] gap-4 lg:grid-cols-[220px_minmax(0,1fr)] xl:gap-8">
@@ -330,7 +330,9 @@ return (
           <div className="absolute -right-12 top-24 h-40 w-40 rotate-12 border border-[#c8ff45]/10" />
           <Brand />
 
-          <p className="mt-12 font-mono text-[9px] tracking-[.28em] text-zinc-600">NAVIGATION / 05</p>
+          <p className="mt-12 font-mono text-[9px] tracking-[.28em] text-zinc-600">
+            NAVIGATION / 05
+          </p>
           <nav className="mt-4 space-y-1">
             {nav.map((item) => (
               <NavButton
@@ -380,7 +382,10 @@ return (
                 className="grid h-11 w-11 shrink-0 place-items-center border border-white/10 bg-white/[0.025] transition hover:border-[#c8ff45]/50 hover:text-[#c8ff45]"
                 aria-label="刷新"
               >
-                <RefreshCcw size={17} className={loading ? "animate-spin" : ""} />
+                <RefreshCcw
+                  size={17}
+                  className={loading ? "animate-spin" : ""}
+                />
               </button>
 
               <div className="flex min-w-0 items-center gap-2 border-l border-white/10 pl-2 sm:gap-3 sm:pl-4">
@@ -415,21 +420,26 @@ return (
               ) : (
                 <>
                   {activePage === "overview" && (
-                    <Overview data={data} user={user} />
+                    <SignalOverview
+                      data={data}
+                      user={user}
+                      navigate={setActivePage}
+                      openModal={setModal}
+                    />
                   )}
 
                   {activePage === "sync" && (
-                    <SyncPage
+                    <SignalRoutes
                       groups={user.groups}
                       channels={user.address_book}
                       openCreate={() => setModal("sync")}
                       edit={setEditGroupIndex}
                       remove={async (index) => {
                         confirmAction("确认移除这个同步组？", async () => {
-                          const result = await requestApi<{ ok: boolean; user?: UserData }>(
-                            `/groups/${index}`,
-                            "DELETE"
-                          );
+                          const result = await requestApi<{
+                            ok: boolean;
+                            user?: UserData;
+                          }>(`/groups/${index}`, "DELETE");
                           if (updateFromResponse(result)) refresh();
                         });
                       }}
@@ -437,11 +447,11 @@ return (
                   )}
 
                   {activePage === "tools" && (
-                    <ToolsPage openModal={setModal} />
+                    <SignalTools openModal={setModal} />
                   )}
 
                   {activePage === "tasks" && (
-                    <TasksPage
+                    <SignalAutomation
                       tab={activeTaskTab}
                       setTab={setActiveTaskTab}
                       stats={user.stats_tasks}
@@ -454,24 +464,24 @@ return (
                         setEditTask(
                           kind === "stat"
                             ? { kind, index, task: user.stats_tasks[index] }
-                            : { kind, index, task: user.dir_tasks[index] }
+                            : { kind, index, task: user.dir_tasks[index] },
                         )
                       }
                       removeStat={(index) =>
                         confirmAction("确认删除此统计任务？", async () => {
-                          const result = await requestApi<{ ok: boolean; user?: UserData }>(
-                            `/stats/${index}`,
-                            "DELETE"
-                          );
+                          const result = await requestApi<{
+                            ok: boolean;
+                            user?: UserData;
+                          }>(`/stats/${index}`, "DELETE");
                           if (updateFromResponse(result)) refresh();
                         })
                       }
                       removeDir={(index) =>
                         confirmAction("确认删除此目录任务？", async () => {
-                          const result = await requestApi<{ ok: boolean; user?: UserData }>(
-                            `/dirs/${index}`,
-                            "DELETE"
-                          );
+                          const result = await requestApi<{
+                            ok: boolean;
+                            user?: UserData;
+                          }>(`/dirs/${index}`, "DELETE");
                           if (updateFromResponse(result)) refresh();
                         })
                       }
@@ -479,16 +489,16 @@ return (
                   )}
 
                   {activePage === "channels" && (
-                    <ChannelsPage
+                    <SignalChannels
                       channels={user.address_book}
                       openCreate={() => setModal("channel")}
                       edit={setEditChannelId}
                       remove={(id) =>
                         confirmAction("确认从频道簿删除该频道？", async () => {
-                          const result = await requestApi<{ ok: boolean; user?: UserData }>(
-                            `/channels/${encodeURIComponent(id)}`,
-                            "DELETE"
-                          );
+                          const result = await requestApi<{
+                            ok: boolean;
+                            user?: UserData;
+                          }>(`/channels/${encodeURIComponent(id)}`, "DELETE");
                           if (updateFromResponse(result)) refresh();
                         })
                       }
@@ -507,15 +517,19 @@ return (
         {toast && <Toast type={toast.type}>{toast.text}</Toast>}
       </AnimatePresence>
 
-      <Modal open={modal === "sync"} onClose={() => setModal(null)} title="新建同步组">
+      <Modal
+        open={modal === "sync"}
+        onClose={() => setModal(null)}
+        title="新建同步组"
+      >
         <SyncForm
           channels={user.address_book}
           onSubmit={async (payload) => {
-            const result = await requestApi<{ ok: boolean; user?: UserData; msg?: string }>(
-              "/groups",
-              "POST",
-              payload
-            );
+            const result = await requestApi<{
+              ok: boolean;
+              user?: UserData;
+              msg?: string;
+            }>("/groups", "POST", payload);
             if (updateFromResponse(result)) {
               setModal(null);
               refresh();
@@ -524,23 +538,43 @@ return (
         />
       </Modal>
 
-      <Modal open={editGroupIndex !== null} onClose={() => setEditGroupIndex(null)} title="编辑同步组">
+      <Modal
+        open={editGroupIndex !== null}
+        onClose={() => setEditGroupIndex(null)}
+        title="编辑同步组"
+      >
         {editGroupIndex !== null && user.groups[editGroupIndex] && (
-          <SyncForm channels={user.address_book} initial={user.groups[editGroupIndex]} submitText="保存同步路径" onSubmit={async (payload) => {
-            const result = await requestApi<{ ok: boolean; user?: UserData; msg?: string }>(`/groups/${editGroupIndex}`, "PUT", payload);
-            if (updateFromResponse(result)) { setEditGroupIndex(null); refresh(); }
-          }} />
+          <SyncForm
+            channels={user.address_book}
+            initial={user.groups[editGroupIndex]}
+            submitText="保存同步路径"
+            onSubmit={async (payload) => {
+              const result = await requestApi<{
+                ok: boolean;
+                user?: UserData;
+                msg?: string;
+              }>(`/groups/${editGroupIndex}`, "PUT", payload);
+              if (updateFromResponse(result)) {
+                setEditGroupIndex(null);
+                refresh();
+              }
+            }}
+          />
         )}
       </Modal>
 
-      <Modal open={modal === "channel"} onClose={() => setModal(null)} title="收录频道">
+      <Modal
+        open={modal === "channel"}
+        onClose={() => setModal(null)}
+        title="收录频道"
+      >
         <ChannelForm
           onSubmit={async (payload) => {
-            const result = await requestApi<{ ok: boolean; user?: UserData; msg?: string }>(
-              "/channels",
-              "POST",
-              payload
-            );
+            const result = await requestApi<{
+              ok: boolean;
+              user?: UserData;
+              msg?: string;
+            }>("/channels", "POST", payload);
             if (updateFromResponse(result)) {
               setModal(null);
               refresh();
@@ -549,24 +583,50 @@ return (
         />
       </Modal>
 
-      <Modal open={editChannelId !== null} onClose={() => setEditChannelId(null)} title="编辑频道">
+      <Modal
+        open={editChannelId !== null}
+        onClose={() => setEditChannelId(null)}
+        title="编辑频道"
+      >
         {editChannelId !== null && (
-          <ChannelForm initial={{ id: editChannelId, name: user.address_book[editChannelId] || "" }} submitText="保存频道" onSubmit={async (payload) => {
-            const result = await requestApi<{ ok: boolean; user?: UserData; msg?: string }>(`/channels/${encodeURIComponent(editChannelId)}`, "PUT", payload);
-            if (updateFromResponse(result)) { setEditChannelId(null); refresh(); }
-          }} />
+          <ChannelForm
+            initial={{
+              id: editChannelId,
+              name: user.address_book[editChannelId] || "",
+            }}
+            submitText="保存频道"
+            onSubmit={async (payload) => {
+              const result = await requestApi<{
+                ok: boolean;
+                user?: UserData;
+                msg?: string;
+              }>(
+                `/channels/${encodeURIComponent(editChannelId)}`,
+                "PUT",
+                payload,
+              );
+              if (updateFromResponse(result)) {
+                setEditChannelId(null);
+                refresh();
+              }
+            }}
+          />
         )}
       </Modal>
 
-      <Modal open={modal === "stat"} onClose={() => setModal(null)} title="创建统计任务">
+      <Modal
+        open={modal === "stat"}
+        onClose={() => setModal(null)}
+        title="创建统计任务"
+      >
         <StatForm
           channels={user.address_book}
           onSubmit={async (payload) => {
-            const result = await requestApi<{ ok: boolean; user?: UserData; msg?: string }>(
-              "/stats",
-              "POST",
-              payload
-            );
+            const result = await requestApi<{
+              ok: boolean;
+              user?: UserData;
+              msg?: string;
+            }>("/stats", "POST", payload);
             if (updateFromResponse(result)) {
               setModal(null);
               refresh();
@@ -575,15 +635,19 @@ return (
         />
       </Modal>
 
-      <Modal open={modal === "dir"} onClose={() => setModal(null)} title="创建目录任务">
+      <Modal
+        open={modal === "dir"}
+        onClose={() => setModal(null)}
+        title="创建目录任务"
+      >
         <DirectoryTaskForm
           channels={user.address_book}
           onSubmit={async (payload) => {
-            const result = await requestApi<{ ok: boolean; user?: UserData; msg?: string }>(
-              "/dirs",
-              "POST",
-              payload
-            );
+            const result = await requestApi<{
+              ok: boolean;
+              user?: UserData;
+              msg?: string;
+            }>("/dirs", "POST", payload);
             if (updateFromResponse(result)) {
               setModal(null);
               refresh();
@@ -592,19 +656,26 @@ return (
         />
       </Modal>
 
-      <Modal open={Boolean(editTask)} onClose={() => setEditTask(null)} title="编辑自动任务">
+      <Modal
+        open={Boolean(editTask)}
+        onClose={() => setEditTask(null)}
+        title="编辑自动任务"
+      >
         {editTask && (
           <TaskEditForm
             kind={editTask.kind}
             task={editTask.task}
             channels={user.address_book}
             onSubmit={async (field, value) => {
-              const endpoint = editTask.kind === "stat" ? `/stats/${editTask.index}` : `/dirs/${editTask.index}`;
-              const result = await requestApi<{ ok: boolean; user?: UserData; msg?: string }>(
-                endpoint,
-                "PUT",
-                { field, value }
-              );
+              const endpoint =
+                editTask.kind === "stat"
+                  ? `/stats/${editTask.index}`
+                  : `/dirs/${editTask.index}`;
+              const result = await requestApi<{
+                ok: boolean;
+                user?: UserData;
+                msg?: string;
+              }>(endpoint, "PUT", { field, value });
               if (updateFromResponse(result)) {
                 setEditTask(null);
                 refresh();
@@ -614,16 +685,27 @@ return (
         )}
       </Modal>
 
-      <Modal open={modal === "buttonNew"} onClose={() => setModal(null)} title="发送按钮消息">
+      <Modal
+        open={modal === "buttonNew"}
+        onClose={() => setModal(null)}
+        title="发送按钮消息"
+      >
         <ButtonMessageForm
           channels={user.address_book}
           onSubmit={async (form, hasMedia) => {
             const result = hasMedia
-              ? await uploadApi<{ ok: boolean; msg?: string }>("/btn_multi", form as FormData)
+              ? await uploadApi<{ ok: boolean; msg?: string }>(
+                  "/btn_multi",
+                  form as FormData,
+                )
               : await requestApi<{ ok: boolean; msg?: string }>(
                   "/btn_multi",
                   "POST",
-                  form as { ch_id: string; text: string; buttons: { text: string; url: string }[] }
+                  form as {
+                    ch_id: string;
+                    text: string;
+                    buttons: { text: string; url: string }[];
+                  },
                 );
 
             if (!result.ok) {
@@ -637,14 +719,25 @@ return (
         />
       </Modal>
 
-      <Modal open={modal === "buttonOld"} onClose={() => setModal(null)} title="修改旧消息按钮">
+      <Modal
+        open={modal === "buttonOld"}
+        onClose={() => setModal(null)}
+        title="修改旧消息按钮"
+      >
         <ButtonMessageForm
           channels={user.address_book}
           editMode
           onSubmit={async (form, hasMedia) => {
             const result = hasMedia
-              ? await uploadApi<{ ok: boolean; msg?: string }>("/btn_old", form as FormData)
-              : await requestApi<{ ok: boolean; msg?: string }>("/btn_old", "POST", form);
+              ? await uploadApi<{ ok: boolean; msg?: string }>(
+                  "/btn_old",
+                  form as FormData,
+                )
+              : await requestApi<{ ok: boolean; msg?: string }>(
+                  "/btn_old",
+                  "POST",
+                  form,
+                );
             if (!result.ok) return notify(result.msg || "操作失败", "error");
             notify("消息已更新");
             setModal(null);
@@ -652,7 +745,11 @@ return (
         />
       </Modal>
 
-      <Modal open={modal === "backup"} onClose={() => setModal(null)} title="智能备份">
+      <Modal
+        open={modal === "backup"}
+        onClose={() => setModal(null)}
+        title="智能备份"
+      >
         <BackupForm
           channels={user.address_book}
           groups={user.groups}
@@ -660,16 +757,21 @@ return (
             const result = await requestApi<{ ok: boolean; msg?: string }>(
               "/backup",
               "POST",
-              payload
+              payload,
             );
-            if (!result.ok) return notify(result.msg || "任务启动失败", "error");
+            if (!result.ok)
+              return notify(result.msg || "任务启动失败", "error");
             notify("备份任务已提交，请在机器人会话查看进度");
             setModal(null);
           }}
         />
       </Modal>
 
-      <Modal open={modal === "directory"} onClose={() => setModal(null)} title="生成手动目录">
+      <Modal
+        open={modal === "directory"}
+        onClose={() => setModal(null)}
+        title="生成手动目录"
+      >
         <SingleChannelActionForm
           channels={user.address_book}
           label="扫描频道"
@@ -679,59 +781,86 @@ return (
             const result = await requestApi<{ ok: boolean; msg?: string }>(
               "/gen_dir",
               "POST",
-              { ch_id: channelId }
+              { ch_id: channelId },
             );
-            if (!result.ok) return notify(result.msg || "任务启动失败", "error");
+            if (!result.ok)
+              return notify(result.msg || "任务启动失败", "error");
             notify("扫描任务已启动，请在机器人会话查看结果");
             setModal(null);
           }}
         />
       </Modal>
 
-      <Modal open={modal === "replace"} onClose={() => setModal(null)} title="批量替换标签">
+      <Modal
+        open={modal === "replace"}
+        onClose={() => setModal(null)}
+        title="批量替换标签"
+      >
         <ReplaceTagForm
           channels={user.address_book}
           onSubmit={async (payload) => {
             const result = await requestApi<{ ok: boolean; msg?: string }>(
               "/replace_tag",
               "POST",
-              payload
+              payload,
             );
-            if (!result.ok) return notify(result.msg || "任务启动失败", "error");
+            if (!result.ok)
+              return notify(result.msg || "任务启动失败", "error");
             notify("替换任务已提交，请在机器人会话查看结果");
             setModal(null);
           }}
         />
       </Modal>
 
-      <Modal open={modal === "members"} onClose={() => setModal(null)} title="监控频道成员">
+      <Modal
+        open={modal === "members"}
+        onClose={() => setModal(null)}
+        title="监控频道成员"
+      >
         <MemberMonitorForm
           channels={user.address_book}
           onSubmit={async (channelId, interval) => {
             const result = await requestApi<{ ok: boolean; msg?: string }>(
               "/member_monitors",
               "POST",
-              { ch_id: channelId, interval }
+              { ch_id: channelId, interval },
             );
-            if (!result.ok) return notify(result.msg || "任务启动失败", "error");
+            if (!result.ok)
+              return notify(result.msg || "任务启动失败", "error");
             notify("成员定时备份任务已创建");
             refresh();
           }}
         />
-        {!!user.member_monitors.length && <div className="mt-5 space-y-2">
-          {user.member_monitors.map((item) => <MemberMonitorCard key={item.channel_id} item={item} channels={user.address_book} notify={notify} refresh={refresh} updateFromResponse={updateFromResponse} />)}
-        </div>}
+        {!!user.member_monitors.length && (
+          <div className="mt-5 space-y-2">
+            {user.member_monitors.map((item) => (
+              <MemberMonitorCard
+                key={item.channel_id}
+                item={item}
+                channels={user.address_book}
+                notify={notify}
+                refresh={refresh}
+                updateFromResponse={updateFromResponse}
+              />
+            ))}
+          </div>
+        )}
       </Modal>
 
-      <Modal open={modal === "batch"} onClose={() => setModal(null)} title="批量创建频道">
+      <Modal
+        open={modal === "batch"}
+        onClose={() => setModal(null)}
+        title="批量创建频道"
+      >
         <BatchCreateForm
           onSubmit={async (payload) => {
             const result = await requestApi<{ ok: boolean; msg?: string }>(
               "/batch_create",
               "POST",
-              payload
+              payload,
             );
-            if (!result.ok) return notify(result.msg || "任务启动失败", "error");
+            if (!result.ok)
+              return notify(result.msg || "任务启动失败", "error");
             notify("批量创建任务已提交，请在机器人会话查看进度");
             setModal(null);
             refresh();
@@ -744,7 +873,10 @@ return (
 
 function AmbientOrbs() {
   return (
-    <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+    <div
+      aria-hidden
+      className="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
+    >
       <motion.div
         className="absolute -left-32 top-24 h-80 w-80 rounded-full bg-[#c8ff45]/10 blur-[120px]"
         animate={{ x: [0, 70, 0], y: [0, 35, 0] }}
@@ -763,7 +895,9 @@ function Brand() {
   return (
     <div className="flex items-center gap-3">
       <div className="relative grid h-11 w-11 place-items-center overflow-hidden bg-[#c8ff45] text-black [clip-path:polygon(0_0,82%_0,100%_18%,100%_100%,18%_100%,0_82%)]">
-        <span className="font-mono text-sm font-black tracking-[-.12em]">N/7</span>
+        <span className="font-mono text-sm font-black tracking-[-.12em]">
+          N/7
+        </span>
       </div>
       <div>
         <p className="text-sm font-semibold tracking-[-.03em]">Nine7</p>
@@ -776,7 +910,7 @@ function Brand() {
 }
 
 function Avatar({
-  user
+  user,
 }: {
   user?: { first_name: string; photo_url?: string };
 }) {
@@ -800,14 +934,18 @@ function Avatar({
 function telegramDisplayName(user?: TelegramUser) {
   if (!user) return "访客模式";
 
-  return [user.first_name, user.last_name].filter(Boolean).join(" ") || user.username || "Telegram 用户";
+  return (
+    [user.first_name, user.last_name].filter(Boolean).join(" ") ||
+    user.username ||
+    "Telegram 用户"
+  );
 }
 
 function NavButton({
   active,
   icon,
   children,
-  onClick
+  onClick,
 }: {
   active: boolean;
   icon: ReactNode;
@@ -821,7 +959,7 @@ function NavButton({
         "group relative flex min-h-11 w-full items-center gap-3 px-3 py-3 text-left text-sm transition",
         active
           ? "bg-[#c8ff45] text-black shadow-[0_12px_35px_rgba(200,255,69,0.12)]"
-          : "text-zinc-500 hover:bg-white/[0.04] hover:text-white"
+          : "text-zinc-500 hover:bg-white/[0.04] hover:text-white",
       )}
     >
       {icon}
@@ -830,30 +968,701 @@ function NavButton({
         size={15}
         className={clsx(
           "ml-auto transition-transform",
-          active ? "translate-x-0 opacity-100" : "-translate-x-1 opacity-0 group-hover:opacity-60"
+          active
+            ? "translate-x-0 opacity-100"
+            : "-translate-x-1 opacity-0 group-hover:opacity-60",
         )}
       />
     </button>
   );
 }
 
+function SignalFrame({
+  index,
+  label,
+  title,
+  note,
+  action,
+  children,
+}: {
+  index: string;
+  label: string;
+  title: string;
+  note: string;
+  action?: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <section className="pb-24 lg:pb-0">
+      <div className="mb-6 grid grid-cols-[auto_1fr] gap-x-4 border-b border-white/10 pb-6 sm:gap-x-7">
+        <span className="font-mono text-xs text-[#c8ff45]">/{index}</span>
+        <div className="min-w-0">
+          <p className="font-mono text-[9px] tracking-[.28em] text-zinc-600">
+            {label}
+          </p>
+          <div className="mt-2 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+            <div>
+              <h2 className="text-[clamp(2.8rem,12vw,6.8rem)] font-medium leading-[.82] tracking-[-.085em]">
+                {title}
+              </h2>
+              <p className="mt-4 max-w-xl text-sm leading-6 text-zinc-500">
+                {note}
+              </p>
+            </div>
+            {action}
+          </div>
+        </div>
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function SignalOverview({
+  data,
+  user,
+  navigate,
+  openModal,
+}: {
+  data: BackendData | null;
+  user: UserData;
+  navigate: (page: PageKey) => void;
+  openModal: (modal: ModalKey) => void;
+}) {
+  const totalTasks =
+    user.stats_tasks.length +
+    user.dir_tasks.length +
+    user.member_monitors.length;
+  const metrics = [
+    ["ROUTES", user.groups.length, FolderSync],
+    ["AUTOMATIONS", totalTasks, Activity],
+    ["NODES", Object.keys(user.address_book).length, Radio],
+    ["MAPPINGS", data?.msg_count || 0, Link2],
+  ] as const;
+  return (
+    <div className="pb-24 lg:pb-0">
+      <section className="relative min-h-[calc(100dvh-112px)] overflow-hidden border border-white/10 bg-[#0d100d] p-5 sm:p-8 lg:min-h-[680px]">
+        <div className="absolute inset-0 opacity-30 [background-image:linear-gradient(rgba(200,255,69,.08)_1px,transparent_1px),linear-gradient(90deg,rgba(200,255,69,.08)_1px,transparent_1px)] [background-size:32px_32px]" />
+        <motion.div
+          aria-hidden
+          className="absolute right-[-18%] top-[6%] aspect-square w-[78%] rounded-full border border-[#c8ff45]/20 sm:w-[48%]"
+          animate={{ rotate: 360 }}
+          transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
+        >
+          <div className="absolute inset-[14%] rounded-full border border-dashed border-white/10" />
+          <div className="absolute inset-[37%] rounded-full bg-[#c8ff45]/10 shadow-[0_0_80px_rgba(200,255,69,.18)]" />
+        </motion.div>
+        <div className="relative flex min-h-[calc(100dvh-154px)] flex-col lg:min-h-[614px]">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="font-mono text-[9px] tracking-[.3em] text-[#c8ff45]">
+                NINE7 SIGNAL OPERATING SYSTEM
+              </p>
+              <p className="mt-2 font-mono text-[9px] text-zinc-600">
+                UTC {new Date().toISOString().slice(0, 16).replace("T", " / ")}
+              </p>
+            </div>
+            <span
+              className={clsx(
+                "flex items-center gap-2 font-mono text-[10px]",
+                data?.userbot ? "text-[#c8ff45]" : "text-[#ff725f]",
+              )}
+            >
+              <span className="h-2 w-2 bg-current" />
+              {data?.userbot ? "CORE ONLINE" : "CORE OFFLINE"}
+            </span>
+          </div>
+          <div className="my-auto py-14">
+            <p className="mb-4 max-w-sm text-xs uppercase leading-5 tracking-[.18em] text-zinc-500">
+              Channels become systems when every signal has a destination.
+            </p>
+            <h2 className="max-w-5xl text-[clamp(3.8rem,17vw,11rem)] font-medium leading-[.72] tracking-[-.1em]">
+              MAKE
+              <br />
+              <span className="ml-[.28em] text-[#c8ff45]">SIGNAL</span>
+              <br />
+              MOVE.
+            </h2>
+          </div>
+          <div className="grid gap-5 border-t border-white/10 pt-5 lg:grid-cols-[1fr_auto] lg:items-end">
+            <div className="grid grid-cols-2 gap-px bg-white/10 sm:grid-cols-4">
+              {metrics.map(([label, value, Icon]) => (
+                <button
+                  key={label}
+                  onClick={() =>
+                    navigate(
+                      label === "ROUTES"
+                        ? "sync"
+                        : label === "NODES"
+                          ? "channels"
+                          : label === "AUTOMATIONS"
+                            ? "tasks"
+                            : "overview",
+                    )
+                  }
+                  className="group bg-[#0d100d] p-3 text-left transition hover:bg-[#c8ff45] hover:text-black sm:p-4"
+                >
+                  <Icon size={16} />
+                  <p className="mt-5 font-mono text-2xl tracking-[-.08em] sm:text-3xl">
+                    {value}
+                  </p>
+                  <p className="mt-1 truncate font-mono text-[8px] tracking-[.16em] opacity-50">
+                    {label}
+                  </p>
+                </button>
+              ))}
+            </div>
+            <ActionButton
+              onClick={() => openModal("buttonNew")}
+              icon={<Send size={16} />}
+            >
+              发布新信号
+            </ActionButton>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function SignalRoutes({
+  groups,
+  channels,
+  openCreate,
+  edit,
+  remove,
+}: {
+  groups: Group[];
+  channels: Record<string, string>;
+  openCreate: () => void;
+  edit: (index: number) => void;
+  remove: (index: number) => void;
+}) {
+  return (
+    <SignalFrame
+      index="01"
+      label="ROUTING TOPOLOGY"
+      title="信号路径"
+      note="来源在左，目的地在右。每一条路径都代表持续运行的内容流。"
+      action={
+        <ActionButton icon={<Plus size={16} />} onClick={openCreate}>
+          建立路径
+        </ActionButton>
+      }
+    >
+      {!groups.length ? (
+        <SignalEmpty
+          icon={<FolderSync />}
+          title="尚无信号路径"
+          action={openCreate}
+        />
+      ) : (
+        <div className="relative space-y-3 before:absolute before:bottom-6 before:left-[27px] before:top-6 before:w-px before:bg-gradient-to-b before:from-[#c8ff45] before:to-transparent">
+          {groups.map((group, index) => {
+            const targets = Array.isArray(group.tgt) ? group.tgt : [group.tgt];
+            return (
+              <motion.article
+                key={`${group.src}-${index}`}
+                className="group relative grid gap-4 border border-white/10 bg-[#0e110e] p-4 pl-14 transition hover:border-[#c8ff45]/35 sm:grid-cols-[1fr_auto_1.2fr_auto] sm:items-center sm:p-5 sm:pl-16"
+                initial={{ opacity: 0, x: -12 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.04 }}
+              >
+                <span className="absolute left-[21px] top-7 h-3 w-3 rotate-45 border border-[#c8ff45] bg-[#0e110e]" />
+                <div className="min-w-0">
+                  <p className="font-mono text-[8px] tracking-[.2em] text-[#c8ff45]">
+                    ROUTE {String(index + 1).padStart(2, "0")}
+                  </p>
+                  <h3 className="mt-2 truncate text-lg font-medium">
+                    {group.name || `同步组 ${index + 1}`}
+                  </h3>
+                  <p className="mt-1 truncate font-mono text-[10px] text-zinc-600">
+                    {channelName(group.src, channels)}
+                  </p>
+                </div>
+                <ArrowUpRight
+                  className="hidden rotate-45 text-zinc-700 sm:block"
+                  size={18}
+                />
+                <div className="flex min-w-0 flex-wrap gap-2">
+                  {targets.map((target, i) => (
+                    <span
+                      key={`${target}-${i}`}
+                      className="max-w-full truncate border border-white/10 px-3 py-2 text-xs text-zinc-400"
+                    >
+                      {channelName(target, channels)}
+                    </span>
+                  ))}
+                </div>
+                <div className="flex gap-1">
+                  <IconButton
+                    label="编辑路径"
+                    onClick={() => edit(index)}
+                    icon={<Settings2 size={16} />}
+                  />
+                  <IconButton
+                    danger
+                    label="删除路径"
+                    onClick={() => remove(index)}
+                    icon={<Trash2 size={16} />}
+                  />
+                </div>
+              </motion.article>
+            );
+          })}
+        </div>
+      )}
+    </SignalFrame>
+  );
+}
+
+const signalTools = [
+  [
+    "buttonNew",
+    "Compose",
+    "发送消息",
+    "创建带正文、媒体和跳转按钮的频道消息。",
+    Send,
+  ],
+  [
+    "buttonOld",
+    "Revise",
+    "修改消息",
+    "重构既有消息的正文、媒体和按钮。",
+    MessageSquareText,
+  ],
+  [
+    "backup",
+    "Replicate",
+    "智能备份",
+    "将频道历史内容安全复制至新的目标节点。",
+    ArchiveRestore,
+  ],
+  [
+    "directory",
+    "Index",
+    "生成目录",
+    "扫描标签并生成可持续更新的内容索引。",
+    FolderCog,
+  ],
+  ["replace", "Transform", "替换标签", "批量变更频道历史中的标签文本。", Tags],
+  [
+    "members",
+    "Observe",
+    "成员备份",
+    "周期采集成员数据并写入 WebDAV。",
+    UsersRound,
+  ],
+  ["batch", "Provision", "创建频道", "批量建立新频道并分配管理权限。", Copy],
+] as const;
+
+function SignalTools({ openModal }: { openModal: (modal: ModalKey) => void }) {
+  return (
+    <SignalFrame
+      index="02"
+      label="COMMAND LIBRARY"
+      title="执行命令"
+      note="每项工具都是一次明确、可追踪的频道操作。选择命令后进入专注工作区。"
+    >
+      <div className="grid border-l border-t border-white/10 sm:grid-cols-2 xl:grid-cols-3">
+        {signalTools.map(([modal, code, title, desc, Icon], index) => (
+          <motion.button
+            key={modal}
+            onClick={() => openModal(modal)}
+            className={clsx(
+              "group relative min-h-52 overflow-hidden border-b border-r border-white/10 bg-[#0d100d] p-5 text-left transition duration-300 hover:bg-[#c8ff45] hover:text-black sm:min-h-64",
+              index === 0 && "sm:col-span-2 xl:col-span-2",
+            )}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.035 }}
+          >
+            <div className="flex items-start justify-between">
+              <span className="font-mono text-[9px] tracking-[.22em] opacity-50">
+                {String(index + 1).padStart(2, "0")} / {code.toUpperCase()}
+              </span>
+              <ArrowUpRight
+                className="transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1"
+                size={18}
+              />
+            </div>
+            <div className="mt-10">
+              <Icon size={index === 0 ? 40 : 28} strokeWidth={1.35} />
+              <h3 className="mt-5 text-2xl font-medium tracking-[-.05em]">
+                {title}
+              </h3>
+              <p className="mt-2 max-w-md text-xs leading-6 text-zinc-500 transition group-hover:text-black/60">
+                {desc}
+              </p>
+            </div>
+          </motion.button>
+        ))}
+      </div>
+    </SignalFrame>
+  );
+}
+
+function IconButton({
+  label,
+  icon,
+  onClick,
+  danger = false,
+}: {
+  label: string;
+  icon: ReactNode;
+  onClick: () => void;
+  danger?: boolean;
+}) {
+  return (
+    <button
+      aria-label={label}
+      title={label}
+      onClick={onClick}
+      className={clsx(
+        "grid h-11 w-11 shrink-0 place-items-center border border-white/10 transition",
+        danger
+          ? "text-zinc-600 hover:border-[#ff725f]/50 hover:text-[#ff725f]"
+          : "text-zinc-500 hover:border-[#c8ff45]/40 hover:text-white",
+      )}
+    >
+      {icon}
+    </button>
+  );
+}
+
+function SignalEmpty({
+  icon,
+  title,
+  action,
+}: {
+  icon: ReactNode;
+  title: string;
+  action: () => void;
+}) {
+  return (
+    <button
+      onClick={action}
+      className="group grid min-h-72 w-full place-items-center border border-dashed border-white/15 bg-white/[.01] p-8 text-center transition hover:border-[#c8ff45]/50"
+    >
+      <div>
+        <div className="mx-auto grid h-14 w-14 place-items-center border border-white/10 text-[#c8ff45] transition group-hover:rotate-6">
+          {icon}
+        </div>
+        <h3 className="mt-5 text-xl font-medium">{title}</h3>
+        <p className="mt-2 text-xs text-zinc-600">轻触此处开始配置</p>
+      </div>
+    </button>
+  );
+}
+
+function SignalAutomation({
+  tab,
+  setTab,
+  stats,
+  dirs,
+  channels,
+  openCreate,
+  openEdit,
+  removeStat,
+  removeDir,
+}: {
+  tab: "stats" | "dirs";
+  setTab: (tab: "stats" | "dirs") => void;
+  stats: StatTask[];
+  dirs: DirTask[];
+  channels: Record<string, string>;
+  openCreate: () => void;
+  openEdit: (kind: "stat" | "dir", index: number) => void;
+  removeStat: (index: number) => void;
+  removeDir: (index: number) => void;
+}) {
+  const list = tab === "stats" ? stats : dirs;
+  return (
+    <SignalFrame
+      index="03"
+      label="AUTOMATION RUNTIME"
+      title="持续运行"
+      note="任务不是静态配置，而是按节奏反复执行的运行单元。"
+      action={
+        <ActionButton icon={<Plus size={16} />} onClick={openCreate}>
+          创建任务
+        </ActionButton>
+      }
+    >
+      <div className="mb-5 flex border-b border-white/10" role="tablist">
+        <button
+          role="tab"
+          aria-selected={tab === "stats"}
+          onClick={() => setTab("stats")}
+          className={clsx(
+            "relative min-h-12 px-5 text-xs",
+            tab === "stats" ? "text-[#c8ff45]" : "text-zinc-600",
+          )}
+        >
+          <BarChart3 className="mr-2 inline" size={15} />
+          统计引擎 <sup>{stats.length}</sup>
+          {tab === "stats" && (
+            <motion.span
+              layoutId="runtime-tab"
+              className="absolute inset-x-0 bottom-0 h-px bg-[#c8ff45]"
+            />
+          )}
+        </button>
+        <button
+          role="tab"
+          aria-selected={tab === "dirs"}
+          onClick={() => setTab("dirs")}
+          className={clsx(
+            "relative min-h-12 px-5 text-xs",
+            tab === "dirs" ? "text-[#c8ff45]" : "text-zinc-600",
+          )}
+        >
+          <ListFilter className="mr-2 inline" size={15} />
+          目录引擎 <sup>{dirs.length}</sup>
+          {tab === "dirs" && (
+            <motion.span
+              layoutId="runtime-tab"
+              className="absolute inset-x-0 bottom-0 h-px bg-[#c8ff45]"
+            />
+          )}
+        </button>
+      </div>
+      {!list.length ? (
+        <SignalEmpty
+          icon={tab === "stats" ? <BarChart3 /> : <ListFilter />}
+          title={tab === "stats" ? "没有统计任务" : "没有目录任务"}
+          action={openCreate}
+        />
+      ) : (
+        <div className="divide-y divide-white/10 border-y border-white/10">
+          {tab === "stats"
+            ? stats.map((task, index) => (
+                <RuntimeRow
+                  key={`${task.channel_id}-${task.msg_id}-${index}`}
+                  number={index + 1}
+                  title={task.task_name || "未命名统计"}
+                  channel={channelName(task.channel_id, channels)}
+                  interval={task.interval || 15}
+                  meta={[
+                    `消息 ${task.msg_id}`,
+                    `前 ${task.top_n || 10} 名`,
+                    `${task.duration || 7} 天`,
+                  ]}
+                  onEdit={() => openEdit("stat", index)}
+                  onRemove={() => removeStat(index)}
+                />
+              ))
+            : dirs.map((task, index) => (
+                <RuntimeRow
+                  key={`${task.scan_id}-${index}`}
+                  number={index + 1}
+                  title={task.task_name || "未命名目录"}
+                  channel={channelName(task.scan_id, channels)}
+                  interval={task.interval || 15}
+                  meta={[
+                    `${task.targets?.length || 0} 个目标`,
+                    `${task.tags_cache?.length || 0} 个标签`,
+                    ...(task.targets || [])
+                      .slice(0, 2)
+                      .map((t) => `消息 ${t.msg_id}`),
+                  ]}
+                  onEdit={() => openEdit("dir", index)}
+                  onRemove={() => removeDir(index)}
+                />
+              ))}
+        </div>
+      )}
+    </SignalFrame>
+  );
+}
+
+function RuntimeRow({
+  number,
+  title,
+  channel,
+  interval,
+  meta,
+  onEdit,
+  onRemove,
+}: {
+  number: number;
+  title: string;
+  channel: string;
+  interval: number;
+  meta: string[];
+  onEdit: () => void;
+  onRemove: () => void;
+}) {
+  return (
+    <motion.article
+      className="group grid gap-4 py-5 sm:grid-cols-[48px_minmax(0,1fr)_auto] sm:items-center"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+    >
+      <div className="font-mono text-xs text-[#c8ff45]">
+        {String(number).padStart(2, "0")}
+      </div>
+      <div className="min-w-0">
+        <div className="flex flex-wrap items-center gap-3">
+          <h3 className="truncate text-lg font-medium">{title}</h3>
+          <span className="flex items-center gap-1.5 font-mono text-[9px] text-[#c8ff45]">
+            <span className="h-1.5 w-1.5 animate-pulse bg-current" />每{" "}
+            {interval} 分钟
+          </span>
+        </div>
+        <p className="mt-1 truncate text-xs text-zinc-600">{channel}</p>
+        <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1">
+          {meta.map((item, i) => (
+            <span
+              key={`${item}-${i}`}
+              className="font-mono text-[9px] text-zinc-500"
+            >
+              {item}
+            </span>
+          ))}
+        </div>
+      </div>
+      <div className="flex gap-1">
+        <IconButton
+          label="编辑任务"
+          icon={<Settings2 size={16} />}
+          onClick={onEdit}
+        />
+        <IconButton
+          danger
+          label="删除任务"
+          icon={<Trash2 size={16} />}
+          onClick={onRemove}
+        />
+      </div>
+    </motion.article>
+  );
+}
+
+function SignalChannels({
+  channels,
+  openCreate,
+  edit,
+  remove,
+}: {
+  channels: Record<string, string>;
+  openCreate: () => void;
+  edit: (id: string) => void;
+  remove: (id: string) => void;
+}) {
+  const [query, setQuery] = useState("");
+  const entries = Object.entries(channels).filter(([id, name]) =>
+    `${id} ${name}`.toLowerCase().includes(query.toLowerCase()),
+  );
+  return (
+    <SignalFrame
+      index="04"
+      label="NODE REGISTRY"
+      title="频道节点"
+      note="为复杂的频道 ID 建立可识别、可搜索的操作坐标。"
+      action={
+        <ActionButton icon={<Plus size={16} />} onClick={openCreate}>
+          登记节点
+        </ActionButton>
+      }
+    >
+      <div className="mb-5 grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center">
+        <div className="relative">
+          <ListFilter
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600"
+            size={16}
+          />
+          <input
+            className="input !pl-11"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="搜索名称或频道 ID"
+          />
+        </div>
+        <p className="font-mono text-[10px] text-zinc-600">
+          {entries.length} / {Object.keys(channels).length} NODES
+        </p>
+      </div>
+      {!Object.keys(channels).length ? (
+        <SignalEmpty
+          icon={<BookMarked />}
+          title="频道簿为空"
+          action={openCreate}
+        />
+      ) : (
+        <div className="grid border-l border-t border-white/10 sm:grid-cols-2 xl:grid-cols-3">
+          {entries.map(([id, name], index) => (
+            <motion.article
+              key={id}
+              className="group min-w-0 border-b border-r border-white/10 bg-[#0d100d] p-5 transition hover:bg-white/[.025]"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: index * 0.025 }}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <span className="grid h-10 w-10 shrink-0 place-items-center bg-[#c8ff45] font-mono text-xs font-bold text-black">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <div className="flex gap-1">
+                  <IconButton
+                    label="编辑频道"
+                    icon={<Settings2 size={15} />}
+                    onClick={() => edit(id)}
+                  />
+                  <IconButton
+                    danger
+                    label="删除频道"
+                    icon={<Trash2 size={15} />}
+                    onClick={() => remove(id)}
+                  />
+                </div>
+              </div>
+              <h3 className="mt-7 truncate text-xl font-medium tracking-[-.04em]">
+                {name}
+              </h3>
+              <p className="mt-2 truncate font-mono text-[10px] text-zinc-600">
+                {id}
+              </p>
+            </motion.article>
+          ))}
+        </div>
+      )}
+    </SignalFrame>
+  );
+}
+
 function Overview({
   data,
-  user
+  user,
 }: {
   data: BackendData | null;
   user: UserData;
 }) {
   const metrics = [
-    { label: "同步矩阵", value: user.groups.length, icon: FolderSync, color: "text-[#b6ff4d]" },
-    { label: "统计引擎", value: user.stats_tasks.length, icon: BarChart3, color: "text-[#9477ff]" },
-    { label: "目录索引", value: user.dir_tasks.length, icon: ListFilter, color: "text-[#ff7464]" },
+    {
+      label: "同步矩阵",
+      value: user.groups.length,
+      icon: FolderSync,
+      color: "text-[#b6ff4d]",
+    },
+    {
+      label: "统计引擎",
+      value: user.stats_tasks.length,
+      icon: BarChart3,
+      color: "text-[#9477ff]",
+    },
+    {
+      label: "目录索引",
+      value: user.dir_tasks.length,
+      icon: ListFilter,
+      color: "text-[#ff7464]",
+    },
     {
       label: "频道节点",
       value: Object.keys(user.address_book).length,
       icon: BookMarked,
-      color: "text-[#80caff]"
-    }
+      color: "text-[#80caff]",
+    },
   ];
 
   return (
@@ -861,7 +1670,9 @@ function Overview({
       <section className="glass relative min-h-[520px] overflow-hidden rounded-[8px] p-5 sm:min-h-[560px] md:p-9">
         <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full border border-[#c8ff45]/20" />
         <div className="absolute -right-2 top-0 h-full w-px bg-gradient-to-b from-transparent via-[#c8ff45]/30 to-transparent sm:right-12" />
-        <div className="absolute bottom-0 right-0 select-none font-mono text-[34vw] font-black leading-none tracking-[-.14em] text-white/[0.018] sm:text-[15rem]">07</div>
+        <div className="absolute bottom-0 right-0 select-none font-mono text-[34vw] font-black leading-none tracking-[-.14em] text-white/[0.018] sm:text-[15rem]">
+          07
+        </div>
 
         <div className="relative grid min-h-[470px] gap-8 xl:grid-cols-[1.15fr_.85fr]">
           <div className="flex flex-col">
@@ -869,7 +1680,9 @@ function Overview({
               AUTOMATION / ORCHESTRATION / ARCHIVE
             </p>
             <h2 className="mt-5 max-w-4xl text-[clamp(3.25rem,13vw,7.8rem)] font-medium leading-[.78] tracking-[-.085em]">
-              CONTROL<br/><span className="ml-[.42em] text-[#c8ff45]">FLOW.</span>
+              CONTROL
+              <br />
+              <span className="ml-[.42em] text-[#c8ff45]">FLOW.</span>
             </h2>
             <p className="mt-auto max-w-lg border-l border-[#c8ff45]/50 pl-4 text-sm leading-7 text-zinc-400">
               一个持续在线的频道操作系统。同步、备份、榜单与目录在同一条清晰的信号链中运行。
@@ -880,11 +1693,13 @@ function Overview({
             <div className="absolute inset-0 opacity-20 [background-image:linear-gradient(rgba(200,255,69,.2)_1px,transparent_1px),linear-gradient(90deg,rgba(200,255,69,.2)_1px,transparent_1px)] [background-size:28px_28px]" />
             <div className="relative flex h-full flex-col justify-between">
               <div className="flex items-center justify-between">
-                <span className="font-mono text-[10px] text-zinc-500">SYSTEM PULSE</span>
+                <span className="font-mono text-[10px] text-zinc-500">
+                  SYSTEM PULSE
+                </span>
                 <span
                   className={clsx(
                     "flex items-center gap-2 text-xs",
-                    data?.userbot ? "text-[#b6ff4d]" : "text-[#ff7464]"
+                    data?.userbot ? "text-[#b6ff4d]" : "text-[#ff7464]",
                   )}
                 >
                   <span className="h-2 w-2 rounded-full bg-current shadow-[0_0_18px_currentColor]" />
@@ -896,14 +1711,21 @@ function Overview({
                 <motion.div
                   className="absolute inset-[-12px] rounded-full border border-dashed border-[#b6ff4d]/30"
                   animate={{ rotate: 360 }}
-                  transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+                  transition={{
+                    duration: 15,
+                    repeat: Infinity,
+                    ease: "linear",
+                  }}
                 />
                 <Gauge size={43} className="text-[#b6ff4d]" strokeWidth={1.2} />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <MiniSignal label="消息映射" value={data?.msg_count || 0} />
-                <MiniSignal label="运行节点" value={data?.userbot ? "01" : "00"} />
+                <MiniSignal
+                  label="运行节点"
+                  value={data?.userbot ? "01" : "00"}
+                />
               </div>
             </div>
           </div>
@@ -920,7 +1742,9 @@ function Overview({
             transition={{ delay: index * 0.06 }}
           >
             <metric.icon size={19} className={metric.color} strokeWidth={1.6} />
-            <p className="mt-8 font-mono text-4xl tracking-[-0.08em]">{metric.value}</p>
+            <p className="mt-8 font-mono text-4xl tracking-[-0.08em]">
+              {metric.value}
+            </p>
             <p className="mt-2 text-xs text-zinc-500">{metric.label}</p>
           </motion.div>
         ))}
@@ -935,7 +1759,11 @@ function Overview({
           />
 
           <div className="mt-6 space-y-3">
-            <StatusLine icon={<Cloud size={17} />} label="云端数据节点" value={data?.webdav_url || "未配置"} />
+            <StatusLine
+              icon={<Cloud size={17} />}
+              label="云端数据节点"
+              value={data?.webdav_url || "未配置"}
+            />
             <StatusLine
               icon={<Radio size={17} />}
               label="Userbot 后台引擎"
@@ -950,7 +1778,6 @@ function Overview({
             />
           </div>
         </div>
-
       </section>
     </div>
   );
@@ -961,7 +1788,7 @@ function SyncPage({
   channels,
   openCreate,
   edit,
-  remove
+  remove,
 }: {
   groups: Group[];
   channels: Record<string, string>;
@@ -981,7 +1808,11 @@ function SyncPage({
       }
     >
       {!groups.length ? (
-        <EmptyState icon={<FolderSync size={34} />} title="尚未建立同步路径" description="创建首个同步组，开始让消息自动流转。" />
+        <EmptyState
+          icon={<FolderSync size={34} />}
+          title="尚未建立同步路径"
+          description="创建首个同步组，开始让消息自动流转。"
+        />
       ) : (
         <div className="grid gap-4 xl:grid-cols-2">
           {groups.map((group, index) => {
@@ -1003,17 +1834,31 @@ function SyncPage({
                       {group.name || `同步组 ${index + 1}`}
                     </h3>
                   </div>
-                  <div className="flex gap-1"><button onClick={() => edit(index)} className="grid h-9 w-9 place-items-center rounded-xl text-zinc-500 hover:bg-white/[0.08] hover:text-white" aria-label="编辑同步组"><Settings2 size={16} /></button><button
-                    onClick={() => remove(index)}
-                    className="grid h-9 w-9 place-items-center rounded-xl border border-white/10 text-zinc-500 transition hover:border-[#ff7464]/40 hover:bg-[#ff7464]/10 hover:text-[#ff7464]"
-                    aria-label="删除同步组"
-                  >
-                    <Trash2 size={16} />
-                  </button></div>
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => edit(index)}
+                      className="grid h-9 w-9 place-items-center rounded-xl text-zinc-500 hover:bg-white/[0.08] hover:text-white"
+                      aria-label="编辑同步组"
+                    >
+                      <Settings2 size={16} />
+                    </button>
+                    <button
+                      onClick={() => remove(index)}
+                      className="grid h-9 w-9 place-items-center rounded-xl border border-white/10 text-zinc-500 transition hover:border-[#ff7464]/40 hover:bg-[#ff7464]/10 hover:text-[#ff7464]"
+                      aria-label="删除同步组"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
                 </div>
 
                 <div className="mt-7 grid gap-3">
-                  <ChannelNode label="来源" id={group.src} channels={channels} active />
+                  <ChannelNode
+                    label="来源"
+                    id={group.src}
+                    channels={channels}
+                    active
+                  />
                   <div className="ml-6 h-5 border-l border-dashed border-white/20" />
                   {targets.map((target, targetIndex) => (
                     <ChannelNode
@@ -1033,61 +1878,57 @@ function SyncPage({
   );
 }
 
-function ToolsPage({
-  openModal
-}: {
-  openModal: (modal: ModalKey) => void;
-}) {
+function ToolsPage({ openModal }: { openModal: (modal: ModalKey) => void }) {
   const tools = [
     {
       title: "发送按钮消息",
       desc: "发送文本或媒体，可添加一个或多个跳转按钮。",
       icon: Send,
       color: "from-[#b6ff4d]/25 to-transparent",
-      modal: "buttonNew" as ModalKey
+      modal: "buttonNew" as ModalKey,
     },
     {
       title: "修改旧消息按钮",
       desc: "为既有消息增加、更新或清除链接按钮。",
       icon: MessageSquareText,
       color: "from-[#9477ff]/25 to-transparent",
-      modal: "buttonOld" as ModalKey
+      modal: "buttonOld" as ModalKey,
     },
     {
       title: "智能备份",
       desc: "跨频道复制历史内容，并支持文件指纹处理。",
       icon: ArchiveRestore,
       color: "from-[#ff7464]/25 to-transparent",
-      modal: "backup" as ModalKey
+      modal: "backup" as ModalKey,
     },
     {
       title: "生成标签目录",
       desc: "扫描历史消息，生成按首字母聚合的目录。",
       icon: FolderCog,
       color: "from-[#b6ff4d]/25 to-transparent",
-      modal: "directory" as ModalKey
+      modal: "directory" as ModalKey,
     },
     {
       title: "批量替换标签",
       desc: "在指定频道中批量替换或删除标签文本。",
       icon: Tags,
       color: "from-[#9477ff]/25 to-transparent",
-      modal: "replace" as ModalKey
+      modal: "replace" as ModalKey,
     },
     {
       title: "监控频道成员",
       desc: "持续记录监控开启后新加入频道或群组的成员。",
       icon: UsersRound,
       color: "from-[#80caff]/25 to-transparent",
-      modal: "members" as ModalKey
+      modal: "members" as ModalKey,
     },
     {
       title: "批量创建频道",
       desc: "基于名称列表自动创建频道与配置管理员。",
       icon: Copy,
       color: "from-[#ff7464]/25 to-transparent",
-      modal: "batch" as ModalKey
-    }
+      modal: "batch" as ModalKey,
+    },
   ];
 
   return (
@@ -1103,10 +1944,15 @@ function ToolsPage({
             onClick={() => openModal(tool.modal)}
             className={clsx(
               "sheen glass tool-card group relative min-h-[158px] overflow-hidden rounded-[20px] p-3.5 text-left transition-[transform,background-color,border-color,color,box-shadow] duration-150 hover:-translate-y-1 sm:min-h-64 sm:rounded-[24px] sm:p-5",
-              index === 0 && "col-span-2 xl:col-span-2"
+              index === 0 && "col-span-2 xl:col-span-2",
             )}
           >
-            <div className={clsx("absolute inset-0 bg-gradient-to-br opacity-70", tool.color)} />
+            <div
+              className={clsx(
+                "absolute inset-0 bg-gradient-to-br opacity-70",
+                tool.color,
+              )}
+            />
             <div className="relative flex h-full flex-col">
               <div className="flex items-start justify-between">
                 <div className="grid h-11 w-11 place-items-center rounded-2xl border border-white/10 bg-black/20">
@@ -1118,8 +1964,12 @@ function ToolsPage({
                 />
               </div>
               <div className="mt-auto">
-                <h3 className="text-lg font-medium tracking-tight">{tool.title}</h3>
-                <p className="mt-2 max-w-sm text-xs leading-6 text-zinc-400">{tool.desc}</p>
+                <h3 className="text-lg font-medium tracking-tight">
+                  {tool.title}
+                </h3>
+                <p className="mt-2 max-w-sm text-xs leading-6 text-zinc-400">
+                  {tool.desc}
+                </p>
               </div>
             </div>
           </motion.button>
@@ -1138,7 +1988,7 @@ function TasksPage({
   openCreate,
   openEdit,
   removeStat,
-  removeDir
+  removeDir,
 }: {
   tab: "stats" | "dirs";
   setTab: (tab: "stats" | "dirs") => void;
@@ -1150,8 +2000,12 @@ function TasksPage({
   removeStat: (index: number) => void;
   removeDir: (index: number) => void;
 }) {
-  const [expandedBlacklist, setExpandedBlacklist] = useState<number | null>(null);
-  const [expandedDirBlacklist, setExpandedDirBlacklist] = useState<number | null>(null);
+  const [expandedBlacklist, setExpandedBlacklist] = useState<number | null>(
+    null,
+  );
+  const [expandedDirBlacklist, setExpandedDirBlacklist] = useState<
+    number | null
+  >(null);
 
   return (
     <PagePanel
@@ -1179,17 +2033,26 @@ function TasksPage({
 
       {tab === "stats" &&
         (!stats.length ? (
-          <EmptyState icon={<BarChart3 size={34} />} title="暂无统计任务" description="创建统计任务，自动生成热评与互动榜单。" />
+          <EmptyState
+            icon={<BarChart3 size={34} />}
+            title="暂无统计任务"
+            description="创建统计任务，自动生成热评与互动榜单。"
+          />
         ) : (
           <div className="grid gap-4 xl:grid-cols-2">
             {stats.map((task, index) => (
-              <article key={`${task.channel_id}-${task.msg_id}-${index}`} className="glass rounded-[24px] p-5">
+              <article
+                key={`${task.channel_id}-${task.msg_id}-${index}`}
+                className="glass rounded-[24px] p-5"
+              >
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="font-mono text-[10px] tracking-[0.16em] text-[#9477ff]">
                       STAT ENGINE {String(index + 1).padStart(2, "0")}
                     </p>
-                    <h3 className="mt-2 text-lg font-medium">{task.task_name || "未命名统计"}</h3>
+                    <h3 className="mt-2 text-lg font-medium">
+                      {task.task_name || "未命名统计"}
+                    </h3>
                   </div>
                   <div className="flex items-center gap-1">
                     <button
@@ -1201,37 +2064,59 @@ function TasksPage({
                     </button>
                     <button
                       onClick={() => removeStat(index)}
-                    className="rounded-xl p-2 text-zinc-500 transition hover:bg-[#ff7464]/10 hover:text-[#ff7464]"
-                  >
-                    <Trash2 size={16} />
+                      className="rounded-xl p-2 text-zinc-500 transition hover:bg-[#ff7464]/10 hover:text-[#ff7464]"
+                    >
+                      <Trash2 size={16} />
                     </button>
                   </div>
                 </div>
 
                 <div className="mt-6 grid grid-cols-2 gap-3">
-                  <DataCell label="更新频率" value={`${task.interval || 15} 分钟`} />
-                  <DataCell label="榜单名额" value={`前 ${task.top_n || 10} 名`} />
-                  <DataCell label="存活期限" value={`${task.duration || 7} 天`} />
-                  <DataCell label="触发标签" value={task.trigger_tag || "未设置"} mono />
+                  <DataCell
+                    label="更新频率"
+                    value={`${task.interval || 15} 分钟`}
+                  />
+                  <DataCell
+                    label="榜单名额"
+                    value={`前 ${task.top_n || 10} 名`}
+                  />
+                  <DataCell
+                    label="存活期限"
+                    value={`${task.duration || 7} 天`}
+                  />
+                  <DataCell
+                    label="触发标签"
+                    value={task.trigger_tag || "未设置"}
+                    mono
+                  />
                 </div>
 
                 <div className="mt-4 rounded-xl border border-white/10 bg-black/15 p-3 text-xs text-zinc-400">
                   <p>频道：{channelName(task.channel_id, channels)}</p>
-                  <p className="mt-2">消息：<span className="font-mono text-zinc-300">{task.msg_id}</span></p>
+                  <p className="mt-2">
+                    消息：
+                    <span className="font-mono text-zinc-300">
+                      {task.msg_id}
+                    </span>
+                  </p>
                   <button
                     type="button"
                     className="mt-2 flex w-full items-center justify-between text-left transition hover:text-white"
                     onClick={() =>
-                      setExpandedBlacklist((current) => (current === index ? null : index))
+                      setExpandedBlacklist((current) =>
+                        current === index ? null : index,
+                      )
                     }
                     aria-expanded={expandedBlacklist === index}
                   >
-                    <span>屏蔽名单：{task.stats_blacklist?.length || 0} 项</span>
+                    <span>
+                      屏蔽名单：{task.stats_blacklist?.length || 0} 项
+                    </span>
                     <ChevronRight
                       size={15}
                       className={clsx(
                         "transition-transform",
-                        expandedBlacklist === index && "rotate-90"
+                        expandedBlacklist === index && "rotate-90",
                       )}
                     />
                   </button>
@@ -1261,17 +2146,26 @@ function TasksPage({
 
       {tab === "dirs" &&
         (!dirs.length ? (
-          <EmptyState icon={<ListFilter size={34} />} title="暂无目录任务" description="建立自动目录，持续收集频道中的有效标签。" />
+          <EmptyState
+            icon={<ListFilter size={34} />}
+            title="暂无目录任务"
+            description="建立自动目录，持续收集频道中的有效标签。"
+          />
         ) : (
           <div className="grid gap-4 xl:grid-cols-2">
             {dirs.map((task, index) => (
-              <article key={`${task.scan_id}-${index}`} className="glass rounded-[24px] p-5">
+              <article
+                key={`${task.scan_id}-${index}`}
+                className="glass rounded-[24px] p-5"
+              >
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="font-mono text-[10px] tracking-[0.16em] text-[#b6ff4d]">
                       DIRECTORY {String(index + 1).padStart(2, "0")}
                     </p>
-                    <h3 className="mt-2 text-lg font-medium">{task.task_name || "未命名目录"}</h3>
+                    <h3 className="mt-2 text-lg font-medium">
+                      {task.task_name || "未命名目录"}
+                    </h3>
                   </div>
                   <div className="flex items-center gap-1">
                     <button
@@ -1283,18 +2177,30 @@ function TasksPage({
                     </button>
                     <button
                       onClick={() => removeDir(index)}
-                    className="rounded-xl p-2 text-zinc-500 transition hover:bg-[#ff7464]/10 hover:text-[#ff7464]"
-                  >
-                    <Trash2 size={16} />
+                      className="rounded-xl p-2 text-zinc-500 transition hover:bg-[#ff7464]/10 hover:text-[#ff7464]"
+                    >
+                      <Trash2 size={16} />
                     </button>
                   </div>
                 </div>
 
                 <div className="mt-6 grid grid-cols-2 gap-3">
-                  <DataCell label="扫描频率" value={`${task.interval || 15} 分钟`} />
-                  <DataCell label="已收录标签" value={`${task.tags_cache?.length || 0} 个`} />
-                  <DataCell label="发布目标" value={`${task.targets?.length || 0} 个`} />
-                  <DataCell label="屏蔽标签" value={`${task.blacklist?.length || 0} 个`} />
+                  <DataCell
+                    label="扫描频率"
+                    value={`${task.interval || 15} 分钟`}
+                  />
+                  <DataCell
+                    label="已收录标签"
+                    value={`${task.tags_cache?.length || 0} 个`}
+                  />
+                  <DataCell
+                    label="发布目标"
+                    value={`${task.targets?.length || 0} 个`}
+                  />
+                  <DataCell
+                    label="屏蔽标签"
+                    value={`${task.blacklist?.length || 0} 个`}
+                  />
                 </div>
 
                 <div className="mt-4 rounded-xl border border-white/10 bg-black/15 p-3 text-xs text-zinc-400">
@@ -1302,8 +2208,13 @@ function TasksPage({
                   <div className="mt-3 space-y-2 border-t border-white/10 pt-3">
                     <p className="text-zinc-500">发布目标</p>
                     {task.targets?.map((target, targetIndex) => (
-                      <p key={`${target.channel_id}-${target.msg_id}-${targetIndex}`}>
-                        {channelName(target.channel_id, channels)} · 消息 ID：<span className="font-mono text-zinc-200">{target.msg_id}</span>
+                      <p
+                        key={`${target.channel_id}-${target.msg_id}-${targetIndex}`}
+                      >
+                        {channelName(target.channel_id, channels)} · 消息 ID：
+                        <span className="font-mono text-zinc-200">
+                          {target.msg_id}
+                        </span>
                       </p>
                     ))}
                   </div>
@@ -1311,7 +2222,9 @@ function TasksPage({
                     type="button"
                     className="mt-2 flex w-full items-center justify-between text-left transition hover:text-white"
                     onClick={() =>
-                      setExpandedDirBlacklist((current) => (current === index ? null : index))
+                      setExpandedDirBlacklist((current) =>
+                        current === index ? null : index,
+                      )
                     }
                     aria-expanded={expandedDirBlacklist === index}
                   >
@@ -1320,7 +2233,7 @@ function TasksPage({
                       size={15}
                       className={clsx(
                         "transition-transform",
-                        expandedDirBlacklist === index && "rotate-90"
+                        expandedDirBlacklist === index && "rotate-90",
                       )}
                     />
                   </button>
@@ -1355,7 +2268,7 @@ function TaskEditForm({
   kind,
   task,
   channels,
-  onSubmit
+  onSubmit,
 }: {
   kind: "stat" | "dir";
   task: StatTask | DirTask;
@@ -1364,7 +2277,9 @@ function TaskEditForm({
 }) {
   const stat = kind === "stat" ? (task as StatTask) : null;
   const dir = kind === "dir" ? (task as DirTask) : null;
-  const [field, setField] = useState(kind === "stat" ? "task_name" : "interval");
+  const [field, setField] = useState(
+    kind === "stat" ? "task_name" : "interval",
+  );
   const [targetIndex, setTargetIndex] = useState(0);
   const [value, setValue] = useState(() => {
     if (kind === "stat") return stat?.task_name || "";
@@ -1380,7 +2295,7 @@ function TaskEditForm({
           ? ""
           : Array.isArray(current)
             ? current.join(" ")
-            : String(current ?? "")
+            : String(current ?? ""),
       );
     }
     if (kind === "dir" && dir) {
@@ -1389,41 +2304,58 @@ function TaskEditForm({
         return;
       }
       const current = dir[field as keyof DirTask];
-      setValue(Array.isArray(current) ? current.join(" ") : String(current ?? ""));
+      setValue(
+        Array.isArray(current) ? current.join(" ") : String(current ?? ""),
+      );
     }
   }, [field, kind, stat, dir, targetIndex]);
 
-  const fieldOptions = kind === "stat"
-    ? [
-        ["task_name", "任务名称"], ["table_title", "表头标题"],
-        ["channel_id", "频道 ID"], ["msg_id", "消息 ID 或链接"],
-        ["trigger_tag", "触发标签"], ["top_n", "上榜名额"],
-        ["interval", "更新频率（分钟）"], ["duration", "存活期限（天）"],
-        ["add_stats_bl", "追加屏蔽名单"], ["rm_stats_bl", "移除屏蔽名单"],
-        ["blacklist_title", "屏蔽区标题"]
-      ]
-    : [
-        ["interval", "扫描频率（分钟）"], ["add_blacklist", "追加屏蔽标签"],
-        ["rm_blacklist", "移除屏蔽标签"], ["add_target", "添加发布目标 JSON"],
-        ["target_msg_id", "修改发布目标消息 ID"],
-        ["rm_target", "移除发布目标索引"]
-      ];
+  const fieldOptions =
+    kind === "stat"
+      ? [
+          ["task_name", "任务名称"],
+          ["table_title", "表头标题"],
+          ["channel_id", "频道 ID"],
+          ["msg_id", "消息 ID 或链接"],
+          ["trigger_tag", "触发标签"],
+          ["top_n", "上榜名额"],
+          ["interval", "更新频率（分钟）"],
+          ["duration", "存活期限（天）"],
+          ["add_stats_bl", "追加屏蔽名单"],
+          ["rm_stats_bl", "移除屏蔽名单"],
+          ["blacklist_title", "屏蔽区标题"],
+        ]
+      : [
+          ["interval", "扫描频率（分钟）"],
+          ["add_blacklist", "追加屏蔽标签"],
+          ["rm_blacklist", "移除屏蔽标签"],
+          ["add_target", "添加发布目标 JSON"],
+          ["target_msg_id", "修改发布目标消息 ID"],
+          ["rm_target", "移除发布目标索引"],
+        ];
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     if (!value.trim()) return;
-    if (["top_n", "interval", "duration", "rm_target"].includes(field) && !/^\d+$/.test(value.trim())) return;
+    if (
+      ["top_n", "interval", "duration", "rm_target"].includes(field) &&
+      !/^\d+$/.test(value.trim())
+    )
+      return;
     if (field === "trigger_tag" && !value.trim().startsWith("#")) return;
     if (field === "add_target") {
       try {
         const target = JSON.parse(value);
         if (!target.channel_id || !target.msg_id) return;
-      } catch { return; }
+      } catch {
+        return;
+      }
     }
     setSubmitting(true);
-    const submittedValue = field === "target_msg_id"
-      ? JSON.stringify({ index: Number(targetIndex), msg_id: value.trim() })
-      : value.trim();
+    const submittedValue =
+      field === "target_msg_id"
+        ? JSON.stringify({ index: Number(targetIndex), msg_id: value.trim() })
+        : value.trim();
     await onSubmit(field, submittedValue);
     setSubmitting(false);
   };
@@ -1431,13 +2363,23 @@ function TaskEditForm({
   return (
     <form onSubmit={submit} className="space-y-5">
       <Field label="要修改的字段">
-        <select className="input" value={field} onChange={(event) => setField(event.target.value)}>
-          {fieldOptions.map(([key, label]) => <option key={key} value={key}>{label}</option>)}
+        <select
+          className="input"
+          value={field}
+          onChange={(event) => setField(event.target.value)}
+        >
+          {fieldOptions.map(([key, label]) => (
+            <option key={key} value={key}>
+              {label}
+            </option>
+          ))}
         </select>
       </Field>
       {stat && (
         <div className="rounded-xl border border-white/10 bg-black/15 p-3">
-          <p className="text-xs text-zinc-400">当前屏蔽名单（{stat.stats_blacklist?.length || 0} 项）</p>
+          <p className="text-xs text-zinc-400">
+            当前屏蔽名单（{stat.stats_blacklist?.length || 0} 项）
+          </p>
           {stat.stats_blacklist?.length ? (
             <div className="mt-2 flex flex-wrap gap-2">
               {stat.stats_blacklist.map((name, index) => (
@@ -1457,24 +2399,78 @@ function TaskEditForm({
       {field === "target_msg_id" && dir ? (
         <div className="space-y-4">
           <Field label="发布目标">
-            <select className="input" value={targetIndex} onChange={(event) => {
-              const index = Number(event.target.value); setTargetIndex(index); setValue(dir.targets[index]?.msg_id || "");
-            }}>
-              {dir.targets.map((target, index) => <option key={`${target.channel_id}-${index}`} value={index}>{channelName(target.channel_id, channels)} · 当前 ID {target.msg_id}</option>)}
+            <select
+              className="input"
+              value={targetIndex}
+              onChange={(event) => {
+                const index = Number(event.target.value);
+                setTargetIndex(index);
+                setValue(dir.targets[index]?.msg_id || "");
+              }}
+            >
+              {dir.targets.map((target, index) => (
+                <option key={`${target.channel_id}-${index}`} value={index}>
+                  {channelName(target.channel_id, channels)} · 当前 ID{" "}
+                  {target.msg_id}
+                </option>
+              ))}
             </select>
           </Field>
-          <Field label="新消息 ID 或链接"><input className="input" value={value} onChange={(event) => setValue(event.target.value)} /></Field>
+          <Field label="新消息 ID 或链接">
+            <input
+              className="input"
+              value={value}
+              onChange={(event) => setValue(event.target.value)}
+            />
+          </Field>
         </div>
       ) : field === "channel_id" && stat ? (
-        <Field label="新值"><ChannelPicker channels={channels} value={value} onChange={setValue} /></Field>
+        <Field label="新值">
+          <ChannelPicker
+            channels={channels}
+            value={value}
+            onChange={setValue}
+          />
+        </Field>
       ) : field === "scan_id" && dir ? (
-        <Field label="新值"><ChannelPicker channels={channels} value={value} onChange={setValue} /></Field>
+        <Field label="新值">
+          <ChannelPicker
+            channels={channels}
+            value={value}
+            onChange={setValue}
+          />
+        </Field>
       ) : (
-        <Field label="新值" hint={field === "add_target" ? '格式：{"channel_id":"-100...","msg_id":"123"}' : "多个值请用空格或换行分隔。"}>
-          <input className="input" type={["top_n", "interval", "duration", "rm_target"].includes(field) ? "number" : "text"} value={value} onChange={(event) => setValue(event.target.value)} />
+        <Field
+          label="新值"
+          hint={
+            field === "add_target"
+              ? '格式：{"channel_id":"-100...","msg_id":"123"}'
+              : "多个值请用空格或换行分隔。"
+          }
+        >
+          <input
+            className="input"
+            type={
+              ["top_n", "interval", "duration", "rm_target"].includes(field)
+                ? "number"
+                : "text"
+            }
+            value={value}
+            onChange={(event) => setValue(event.target.value)}
+          />
         </Field>
       )}
-      <ActionButton type="submit" icon={submitting ? <LoaderCircle className="animate-spin" size={17} /> : <Settings2 size={17} />}>
+      <ActionButton
+        type="submit"
+        icon={
+          submitting ? (
+            <LoaderCircle className="animate-spin" size={17} />
+          ) : (
+            <Settings2 size={17} />
+          )
+        }
+      >
         保存修改
       </ActionButton>
     </form>
@@ -1485,7 +2481,7 @@ function ChannelsPage({
   channels,
   openCreate,
   edit,
-  remove
+  remove,
 }: {
   channels: Record<string, string>;
   openCreate: () => void;
@@ -1506,7 +2502,11 @@ function ChannelsPage({
       }
     >
       {!entries.length ? (
-        <EmptyState icon={<BookMarked size={34} />} title="频道簿为空" description="收录频道 ID 后，可在全部表单内快速调用。" />
+        <EmptyState
+          icon={<BookMarked size={34} />}
+          title="频道簿为空"
+          description="收录频道 ID 后，可在全部表单内快速调用。"
+        />
       ) : (
         <div className="grid gap-3 xl:grid-cols-2">
           {entries.map(([id, name], index) => (
@@ -1523,15 +2523,26 @@ function ChannelsPage({
                 </div>
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium">{name}</p>
-                  <p className="mt-1 truncate font-mono text-[10px] text-zinc-500">{id}</p>
+                  <p className="mt-1 truncate font-mono text-[10px] text-zinc-500">
+                    {id}
+                  </p>
                 </div>
               </div>
-              <div className="flex"><button onClick={() => edit(id)} className="rounded-xl p-2 text-zinc-500 transition hover:bg-white/[0.08] hover:text-white" aria-label="编辑频道"><Settings2 size={16} /></button><button
-                onClick={() => remove(id)}
-                className="rounded-xl p-2 text-zinc-500 transition hover:bg-[#ff7464]/10 hover:text-[#ff7464]"
-              >
-                <Trash2 size={16} />
-              </button></div>
+              <div className="flex">
+                <button
+                  onClick={() => edit(id)}
+                  className="rounded-xl p-2 text-zinc-500 transition hover:bg-white/[0.08] hover:text-white"
+                  aria-label="编辑频道"
+                >
+                  <Settings2 size={16} />
+                </button>
+                <button
+                  onClick={() => remove(id)}
+                  className="rounded-xl p-2 text-zinc-500 transition hover:bg-[#ff7464]/10 hover:text-[#ff7464]"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
             </motion.div>
           ))}
         </div>
@@ -1545,7 +2556,7 @@ function PagePanel({
   title,
   description,
   action,
-  children
+  children,
 }: {
   eyebrow: string;
   title: string;
@@ -1557,11 +2568,15 @@ function PagePanel({
     <section className="pb-24 lg:pb-0">
       <div className="mb-7 grid gap-5 border-b border-white/10 pb-6 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
         <div className="min-w-0">
-          <p className="font-mono text-[9px] tracking-[0.24em] text-[#c8ff45]">{eyebrow}</p>
+          <p className="font-mono text-[9px] tracking-[0.24em] text-[#c8ff45]">
+            {eyebrow}
+          </p>
           <h2 className="mt-2 text-[clamp(2.5rem,11vw,5.5rem)] font-medium leading-[.9] tracking-[-0.075em]">
             {title}
           </h2>
-          <p className="mt-4 max-w-xl text-sm leading-6 text-zinc-500">{description}</p>
+          <p className="mt-4 max-w-xl text-sm leading-6 text-zinc-500">
+            {description}
+          </p>
         </div>
         {action}
       </div>
@@ -1573,7 +2588,7 @@ function PagePanel({
 function SectionTitle({
   eyebrow,
   title,
-  action
+  action,
 }: {
   eyebrow: string;
   title: string;
@@ -1582,7 +2597,9 @@ function SectionTitle({
   return (
     <div className="flex items-start justify-between">
       <div>
-        <p className="font-mono text-[10px] tracking-[0.17em] text-zinc-500">{eyebrow}</p>
+        <p className="font-mono text-[10px] tracking-[0.17em] text-zinc-500">
+          {eyebrow}
+        </p>
         <h3 className="mt-2 text-lg font-medium">{title}</h3>
       </div>
       {action}
@@ -1595,7 +2612,7 @@ function ActionButton({
   icon,
   onClick,
   type = "button",
-  variant = "primary"
+  variant = "primary",
 }: {
   children: ReactNode;
   icon?: ReactNode;
@@ -1611,7 +2628,7 @@ function ActionButton({
         "inline-flex min-h-12 items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition active:scale-[0.98]",
         variant === "primary"
           ? "bg-[#c8ff45] text-black shadow-[0_10px_35px_rgba(200,255,69,0.1)] hover:bg-[#d8ff7c]"
-          : "border border-white/10 bg-white/[0.04] text-white hover:bg-white/[0.09]"
+          : "border border-white/10 bg-white/[0.04] text-white hover:bg-white/[0.09]",
       )}
     >
       {icon}
@@ -1624,7 +2641,7 @@ function StatusLine({
   icon,
   label,
   value,
-  success
+  success,
 }: {
   icon: ReactNode;
   label: string;
@@ -1635,12 +2652,20 @@ function StatusLine({
     <div className="flex items-center gap-3 rounded-xl border border-white/[0.07] bg-white/[0.025] p-3">
       <div className={success ? "text-[#b6ff4d]" : "text-zinc-400"}>{icon}</div>
       <p className="min-w-0 flex-1 text-xs text-zinc-400">{label}</p>
-      <p className="max-w-[45%] truncate text-right font-mono text-[10px] text-zinc-300">{value}</p>
+      <p className="max-w-[45%] truncate text-right font-mono text-[10px] text-zinc-300">
+        {value}
+      </p>
     </div>
   );
 }
 
-function MiniSignal({ label, value }: { label: string; value: string | number }) {
+function MiniSignal({
+  label,
+  value,
+}: {
+  label: string;
+  value: string | number;
+}) {
   return (
     <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
       <p className="font-mono text-lg tracking-[-0.08em]">{value}</p>
@@ -1653,7 +2678,7 @@ function ChannelNode({
   label,
   id,
   channels,
-  active
+  active,
 }: {
   label: string;
   id: string;
@@ -1665,7 +2690,7 @@ function ChannelNode({
       <span
         className={clsx(
           "h-2.5 w-2.5 rounded-full",
-          active ? "bg-[#b6ff4d] shadow-[0_0_12px_#b6ff4d]" : "bg-[#9477ff]"
+          active ? "bg-[#b6ff4d] shadow-[0_0_12px_#b6ff4d]" : "bg-[#9477ff]",
         )}
       />
       <div className="min-w-0">
@@ -1679,7 +2704,7 @@ function ChannelNode({
 function DataCell({
   label,
   value,
-  mono
+  mono,
 }: {
   label: string;
   value: string;
@@ -1688,7 +2713,14 @@ function DataCell({
   return (
     <div className="rounded-xl border border-white/[0.08] bg-black/15 p-3">
       <p className="text-[10px] text-zinc-500">{label}</p>
-      <p className={clsx("mt-2 truncate text-sm text-zinc-200", mono && "font-mono")}>{value}</p>
+      <p
+        className={clsx(
+          "mt-2 truncate text-sm text-zinc-200",
+          mono && "font-mono",
+        )}
+      >
+        {value}
+      </p>
     </div>
   );
 }
@@ -1696,7 +2728,7 @@ function DataCell({
 function EmptyState({
   icon,
   title,
-  description
+  description,
 }: {
   icon: ReactNode;
   title: string;
@@ -1709,7 +2741,9 @@ function EmptyState({
           {icon}
         </div>
         <h3 className="mt-5 text-lg font-medium">{title}</h3>
-        <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-zinc-500">{description}</p>
+        <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-zinc-500">
+          {description}
+        </p>
       </div>
     </div>
   );
@@ -1718,7 +2752,7 @@ function EmptyState({
 function TabButton({
   children,
   active,
-  onClick
+  onClick,
 }: {
   children: ReactNode;
   active: boolean;
@@ -1729,7 +2763,9 @@ function TabButton({
       onClick={onClick}
       className={clsx(
         "flex items-center gap-2 rounded-xl px-3 py-2 text-xs transition",
-        active ? "bg-white/[0.11] text-white" : "text-zinc-500 hover:text-zinc-300"
+        active
+          ? "bg-white/[0.11] text-white"
+          : "text-zinc-500 hover:text-zinc-300",
       )}
     >
       {children}
@@ -1741,7 +2777,7 @@ function Modal({
   open,
   onClose,
   title,
-  children
+  children,
 }: {
   open: boolean;
   onClose: () => void;
@@ -1766,14 +2802,20 @@ function Modal({
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
-            transition={{ type: "tween", duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+            transition={{
+              type: "tween",
+              duration: 0.28,
+              ease: [0.22, 1, 0.36, 1],
+            }}
           >
             <div className="sticky -top-5 z-10 mb-7 flex items-center justify-between border-b border-white/10 bg-[#10130f]/95 pb-5 pt-1 md:-top-8 md:bg-[#10130f]/90 md:pt-2">
               <div>
                 <p className="font-mono text-[10px] tracking-[0.18em] text-[#b6ff4d]">
                   COMMAND SHEET
                 </p>
-                <h2 className="mt-2 text-2xl font-medium tracking-[-0.05em] md:text-3xl">{title}</h2>
+                <h2 className="mt-2 text-2xl font-medium tracking-[-0.05em] md:text-3xl">
+                  {title}
+                </h2>
               </div>
               <button
                 onClick={onClose}
@@ -1794,7 +2836,7 @@ function Modal({
 function Field({
   label,
   hint,
-  children
+  children,
 }: {
   label: string;
   hint?: string;
@@ -1802,9 +2844,15 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-2 block text-xs font-medium text-zinc-300">{label}</span>
+      <span className="mb-2 block text-xs font-medium text-zinc-300">
+        {label}
+      </span>
       {children}
-      {hint && <span className="mt-2 block text-[11px] leading-5 text-zinc-500">{hint}</span>}
+      {hint && (
+        <span className="mt-2 block text-[11px] leading-5 text-zinc-500">
+          {hint}
+        </span>
+      )}
     </label>
   );
 }
@@ -1813,7 +2861,7 @@ function ChannelPicker({
   channels,
   value,
   onChange,
-  placeholder = "-100xxxxxxxxxx"
+  placeholder = "-100xxxxxxxxxx",
 }: {
   channels: Record<string, string>;
   value: string;
@@ -1841,7 +2889,7 @@ function ChannelPicker({
                 "rounded-lg border px-2.5 py-1.5 text-[11px] transition",
                 value === id
                   ? "border-[#b6ff4d]/50 bg-[#b6ff4d]/10 text-[#b6ff4d]"
-                  : "border-white/10 bg-white/[0.03] text-zinc-400 hover:text-white"
+                  : "border-white/10 bg-white/[0.03] text-zinc-400 hover:text-white",
               )}
             >
               {name}
@@ -1857,16 +2905,22 @@ function SyncForm({
   channels,
   onSubmit,
   initial,
-  submitText = "创建同步路径"
+  submitText = "创建同步路径",
 }: {
   channels: Record<string, string>;
-  onSubmit: (payload: { name: string; src: string; tgt: string[] }) => Promise<void>;
+  onSubmit: (payload: {
+    name: string;
+    src: string;
+    tgt: string[];
+  }) => Promise<void>;
   initial?: Group;
   submitText?: string;
 }) {
   const [name, setName] = useState(initial?.name || "");
   const [source, setSource] = useState(initial?.src || "");
-  const [targets, setTargets] = useState(initial ? (Array.isArray(initial.tgt) ? initial.tgt : [initial.tgt]) : [""]);
+  const [targets, setTargets] = useState(
+    initial ? (Array.isArray(initial.tgt) ? initial.tgt : [initial.tgt]) : [""],
+  );
   const [submitting, setSubmitting] = useState(false);
 
   const submit = async (event: FormEvent) => {
@@ -1883,11 +2937,20 @@ function SyncForm({
   return (
     <form onSubmit={submit} className="space-y-5">
       <Field label="同步组名称">
-        <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="例如：主频道分发" />
+        <input
+          className="input"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="例如：主频道分发"
+        />
       </Field>
 
       <Field label="来源频道">
-        <ChannelPicker channels={channels} value={source} onChange={setSource} />
+        <ChannelPicker
+          channels={channels}
+          value={source}
+          onChange={setSource}
+        />
       </Field>
 
       <Field label="目标频道">
@@ -1899,7 +2962,9 @@ function SyncForm({
                   channels={channels}
                   value={target}
                   onChange={(value) =>
-                    setTargets((prev) => prev.map((item, i) => (i === index ? value : item)))
+                    setTargets((prev) =>
+                      prev.map((item, i) => (i === index ? value : item)),
+                    )
                   }
                 />
               </div>
@@ -1907,7 +2972,9 @@ function SyncForm({
                 <button
                   type="button"
                   className="h-11 rounded-xl border border-white/10 px-3 text-zinc-400 hover:text-[#ff7464]"
-                  onClick={() => setTargets((prev) => prev.filter((_, i) => i !== index))}
+                  onClick={() =>
+                    setTargets((prev) => prev.filter((_, i) => i !== index))
+                  }
                 >
                   <Trash2 size={16} />
                 </button>
@@ -1925,7 +2992,16 @@ function SyncForm({
         <Plus size={15} /> 添加目标频道
       </button>
 
-      <ActionButton type="submit" icon={submitting ? <LoaderCircle className="animate-spin" size={17} /> : <FolderSync size={17} />}>
+      <ActionButton
+        type="submit"
+        icon={
+          submitting ? (
+            <LoaderCircle className="animate-spin" size={17} />
+          ) : (
+            <FolderSync size={17} />
+          )
+        }
+      >
         {submitText}
       </ActionButton>
     </form>
@@ -1935,7 +3011,7 @@ function SyncForm({
 function ChannelForm({
   onSubmit,
   initial,
-  submitText = "收录到频道簿"
+  submitText = "收录到频道簿",
 }: {
   onSubmit: (payload: { id: string; name: string }) => Promise<void>;
   initial?: { id: string; name: string };
@@ -1953,10 +3029,20 @@ function ChannelForm({
       }}
     >
       <Field label="频道 ID">
-        <input className="input" value={id} onChange={(e) => setId(e.target.value)} placeholder="-100xxxxxxxxxx" />
+        <input
+          className="input"
+          value={id}
+          onChange={(e) => setId(e.target.value)}
+          placeholder="-100xxxxxxxxxx"
+        />
       </Field>
       <Field label="频道备注">
-        <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="例如：主频道" />
+        <input
+          className="input"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="例如：主频道"
+        />
       </Field>
       <ActionButton type="submit" icon={<BookMarked size={17} />}>
         {submitText}
@@ -1967,7 +3053,7 @@ function ChannelForm({
 
 function StatForm({
   channels,
-  onSubmit
+  onSubmit,
 }: {
   channels: Record<string, string>;
   onSubmit: (payload: Record<string, string | number>) => Promise<void>;
@@ -1983,7 +3069,7 @@ function StatForm({
     duration: "7",
     stats_blacklist: "",
     blacklist_title: "本月轮换限制：",
-    extract_from_msg: ""
+    extract_from_msg: "",
   });
 
   const set = (key: keyof typeof form, value: string) =>
@@ -1994,55 +3080,117 @@ function StatForm({
       className="grid gap-5 md:grid-cols-2"
       onSubmit={async (event) => {
         event.preventDefault();
-        if (!form.task_name || !form.channel_id || !form.msg_id || !form.trigger_tag.startsWith("#")) return;
+        if (
+          !form.task_name ||
+          !form.channel_id ||
+          !form.msg_id ||
+          !form.trigger_tag.startsWith("#")
+        )
+          return;
 
         await onSubmit({
           ...form,
           top_n: Number(form.top_n) || 10,
           interval: Number(form.interval) || 15,
-          duration: Number(form.duration) || 7
+          duration: Number(form.duration) || 7,
         });
       }}
     >
       <Field label="任务名称">
-        <input className="input" value={form.task_name} onChange={(e) => set("task_name", e.target.value)} placeholder="例如：每日互动榜单" />
+        <input
+          className="input"
+          value={form.task_name}
+          onChange={(e) => set("task_name", e.target.value)}
+          placeholder="例如：每日互动榜单"
+        />
       </Field>
       <Field label="统计表标题">
-        <input className="input" value={form.table_title} onChange={(e) => set("table_title", e.target.value)} placeholder="例如：互动热评榜" />
+        <input
+          className="input"
+          value={form.table_title}
+          onChange={(e) => set("table_title", e.target.value)}
+          placeholder="例如：互动热评榜"
+        />
       </Field>
 
       <Field label="频道 ID">
-        <ChannelPicker channels={channels} value={form.channel_id} onChange={(v) => set("channel_id", v)} />
+        <ChannelPicker
+          channels={channels}
+          value={form.channel_id}
+          onChange={(v) => set("channel_id", v)}
+        />
       </Field>
       <Field label="承载消息 ID 或链接">
-        <input className="input" value={form.msg_id} onChange={(e) => set("msg_id", e.target.value)} placeholder="311 或消息链接" />
+        <input
+          className="input"
+          value={form.msg_id}
+          onChange={(e) => set("msg_id", e.target.value)}
+          placeholder="311 或消息链接"
+        />
       </Field>
 
       <Field label="显示名额">
-        <input className="input" type="number" min="1" value={form.top_n} onChange={(e) => set("top_n", e.target.value)} />
+        <input
+          className="input"
+          type="number"
+          min="1"
+          value={form.top_n}
+          onChange={(e) => set("top_n", e.target.value)}
+        />
       </Field>
       <Field label="触发标签">
-        <input className="input" value={form.trigger_tag} onChange={(e) => set("trigger_tag", e.target.value)} placeholder="#更新" />
+        <input
+          className="input"
+          value={form.trigger_tag}
+          onChange={(e) => set("trigger_tag", e.target.value)}
+          placeholder="#更新"
+        />
       </Field>
 
       <Field label="更新频率（分钟）">
-        <input className="input" type="number" min="1" value={form.interval} onChange={(e) => set("interval", e.target.value)} />
+        <input
+          className="input"
+          type="number"
+          min="1"
+          value={form.interval}
+          onChange={(e) => set("interval", e.target.value)}
+        />
       </Field>
       <Field label="寿命期限（天）">
-        <input className="input" type="number" min="1" value={form.duration} onChange={(e) => set("duration", e.target.value)} />
+        <input
+          className="input"
+          type="number"
+          min="1"
+          value={form.duration}
+          onChange={(e) => set("duration", e.target.value)}
+        />
       </Field>
 
       <div className="md:col-span-2">
         <Field label="屏蔽名单" hint="多个名字以空格或换行分隔。">
-          <input className="input" value={form.stats_blacklist} onChange={(e) => set("stats_blacklist", e.target.value)} placeholder="名字 A 名字 B" />
+          <input
+            className="input"
+            value={form.stats_blacklist}
+            onChange={(e) => set("stats_blacklist", e.target.value)}
+            placeholder="名字 A 名字 B"
+          />
         </Field>
       </div>
 
       <Field label="屏蔽区标题">
-        <input className="input" value={form.blacklist_title} onChange={(e) => set("blacklist_title", e.target.value)} />
+        <input
+          className="input"
+          value={form.blacklist_title}
+          onChange={(e) => set("blacklist_title", e.target.value)}
+        />
       </Field>
       <Field label="提取上期榜单（可选）">
-        <input className="input" value={form.extract_from_msg} onChange={(e) => set("extract_from_msg", e.target.value)} placeholder="消息 ID 或链接" />
+        <input
+          className="input"
+          value={form.extract_from_msg}
+          onChange={(e) => set("extract_from_msg", e.target.value)}
+          placeholder="消息 ID 或链接"
+        />
       </Field>
 
       <div className="md:col-span-2">
@@ -2056,7 +3204,7 @@ function StatForm({
 
 function DirectoryTaskForm({
   channels,
-  onSubmit
+  onSubmit,
 }: {
   channels: Record<string, string>;
   onSubmit: (payload: {
@@ -2069,30 +3217,43 @@ function DirectoryTaskForm({
   const [name, setName] = useState("");
   const [scanId, setScanId] = useState("");
   const [blacklist, setBlacklist] = useState("");
-  const [targets, setTargets] = useState<Target[]>([{ channel_id: "", msg_id: "" }]);
+  const [targets, setTargets] = useState<Target[]>([
+    { channel_id: "", msg_id: "" },
+  ]);
 
   return (
     <form
       className="space-y-5"
       onSubmit={async (event) => {
         event.preventDefault();
-        const validTargets = targets.filter((item) => item.channel_id && item.msg_id);
+        const validTargets = targets.filter(
+          (item) => item.channel_id && item.msg_id,
+        );
         if (!name || !scanId || !validTargets.length) return;
 
         await onSubmit({
           task_name: name,
           scan_id: scanId,
           targets: validTargets,
-          blacklist: blacklist.split(/\s+/).filter(Boolean)
+          blacklist: blacklist.split(/\s+/).filter(Boolean),
         });
       }}
     >
       <div className="grid gap-5 md:grid-cols-2">
         <Field label="任务名称">
-          <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="例如：频道标签索引" />
+          <input
+            className="input"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="例如：频道标签索引"
+          />
         </Field>
         <Field label="扫描频道">
-          <ChannelPicker channels={channels} value={scanId} onChange={setScanId} />
+          <ChannelPicker
+            channels={channels}
+            value={scanId}
+            onChange={setScanId}
+          />
         </Field>
       </div>
 
@@ -2100,7 +3261,10 @@ function DirectoryTaskForm({
         <p className="mb-3 text-xs font-medium text-zinc-300">目录发布目标</p>
         <div className="space-y-3">
           {targets.map((target, index) => (
-            <div key={index} className="rounded-2xl border border-white/10 bg-black/15 p-4">
+            <div
+              key={index}
+              className="rounded-2xl border border-white/10 bg-black/15 p-4"
+            >
               <div className="mb-3 flex items-center justify-between">
                 <span className="font-mono text-[10px] text-[#b6ff4d]">
                   TARGET {String(index + 1).padStart(2, "0")}
@@ -2109,7 +3273,9 @@ function DirectoryTaskForm({
                   <button
                     type="button"
                     className="text-zinc-500 hover:text-[#ff7464]"
-                    onClick={() => setTargets((prev) => prev.filter((_, i) => i !== index))}
+                    onClick={() =>
+                      setTargets((prev) => prev.filter((_, i) => i !== index))
+                    }
                   >
                     <Trash2 size={15} />
                   </button>
@@ -2123,8 +3289,8 @@ function DirectoryTaskForm({
                   onChange={(value) =>
                     setTargets((prev) =>
                       prev.map((item, i) =>
-                        i === index ? { ...item, channel_id: value } : item
-                      )
+                        i === index ? { ...item, channel_id: value } : item,
+                      ),
                     )
                   }
                 />
@@ -2134,8 +3300,10 @@ function DirectoryTaskForm({
                   onChange={(e) =>
                     setTargets((prev) =>
                       prev.map((item, i) =>
-                        i === index ? { ...item, msg_id: e.target.value } : item
-                      )
+                        i === index
+                          ? { ...item, msg_id: e.target.value }
+                          : item,
+                      ),
                     )
                   }
                   placeholder="承载目录的消息 ID"
@@ -2148,14 +3316,21 @@ function DirectoryTaskForm({
         <button
           type="button"
           className="mt-3 flex items-center gap-2 text-xs text-[#b6ff4d]"
-          onClick={() => setTargets((prev) => [...prev, { channel_id: "", msg_id: "" }])}
+          onClick={() =>
+            setTargets((prev) => [...prev, { channel_id: "", msg_id: "" }])
+          }
         >
           <Plus size={15} /> 增加发布目标
         </button>
       </div>
 
       <Field label="屏蔽标签">
-        <input className="input" value={blacklist} onChange={(e) => setBlacklist(e.target.value)} placeholder="#通知 #归档" />
+        <input
+          className="input"
+          value={blacklist}
+          onChange={(e) => setBlacklist(e.target.value)}
+          placeholder="#通知 #归档"
+        />
       </Field>
 
       <ActionButton type="submit" icon={<ListFilter size={17} />}>
@@ -2168,12 +3343,19 @@ function DirectoryTaskForm({
 function ButtonMessageForm({
   channels,
   onSubmit,
-  editMode = false
+  editMode = false,
 }: {
   channels: Record<string, string>;
   onSubmit: (
-    form: FormData | { ch_id: string; msg_id?: string; text: string; buttons: { text: string; url: string }[] },
-    hasMedia: boolean
+    form:
+      | FormData
+      | {
+          ch_id: string;
+          msg_id?: string;
+          text: string;
+          buttons: { text: string; url: string }[];
+        },
+    hasMedia: boolean,
   ) => Promise<void>;
   editMode?: boolean;
 }) {
@@ -2203,8 +3385,11 @@ function ButtonMessageForm({
       className="space-y-5"
       onSubmit={async (event) => {
         event.preventDefault();
-        if (!channelId || (editMode && !msgId) || (!editMode && !text && !file)) return;
-        const validButtons = buttons.filter((button) => button.text.trim() && button.url.trim());
+        if (!channelId || (editMode && !msgId) || (!editMode && !text && !file))
+          return;
+        const validButtons = buttons.filter(
+          (button) => button.text.trim() && button.url.trim(),
+        );
 
         if (file) {
           const form = new FormData();
@@ -2222,21 +3407,32 @@ function ButtonMessageForm({
             ch_id: channelId,
             ...(editMode ? { msg_id: msgId } : {}),
             text,
-            buttons: validButtons
+            buttons: validButtons,
           },
-          false
+          false,
         );
       }}
     >
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_280px]">
         <div className="space-y-5">
           <Field label="目标频道">
-            <ChannelPicker channels={channels} value={channelId} onChange={setChannelId} />
+            <ChannelPicker
+              channels={channels}
+              value={channelId}
+              onChange={setChannelId}
+            />
           </Field>
 
-          {editMode && <Field label="消息 ID 或消息链接">
-            <input className="input" value={msgId} onChange={(event) => setMsgId(event.target.value)} placeholder="311 或消息链接" />
-          </Field>}
+          {editMode && (
+            <Field label="消息 ID 或消息链接">
+              <input
+                className="input"
+                value={msgId}
+                onChange={(event) => setMsgId(event.target.value)}
+                placeholder="311 或消息链接"
+              />
+            </Field>
+          )}
 
           <Field label="消息正文" hint="后端以 Telegram HTML 模式发送。">
             <div className="mb-2 flex flex-wrap gap-2">
@@ -2247,7 +3443,7 @@ function ButtonMessageForm({
                 ["删除线", "s"],
                 ["代码", "code"],
                 ["代码块", "pre"],
-                ["引用", "blockquote"]
+                ["引用", "blockquote"],
               ].map(([label, tag]) => (
                 <button
                   type="button"
@@ -2259,7 +3455,12 @@ function ButtonMessageForm({
                 </button>
               ))}
             </div>
-            <textarea className="input min-h-36" value={text} onChange={(e) => setText(e.target.value)} placeholder="输入消息内容…" />
+            <textarea
+              className="input min-h-36"
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              placeholder="输入消息内容…"
+            />
           </Field>
 
           <Field label="附加媒体（可选）">
@@ -2273,7 +3474,9 @@ function ButtonMessageForm({
 
           <div>
             <div className="mb-3 flex items-baseline justify-between gap-3">
-              <p className="text-xs font-medium text-zinc-300">按钮列表（可选）</p>
+              <p className="text-xs font-medium text-zinc-300">
+                按钮列表（可选）
+              </p>
               <p className="text-[11px] text-zinc-500">每行一个按钮</p>
             </div>
             <div className="space-y-3">
@@ -2284,7 +3487,11 @@ function ButtonMessageForm({
                     value={button.text}
                     onChange={(e) =>
                       setButtons((prev) =>
-                        prev.map((item, i) => (i === index ? { ...item, text: e.target.value } : item))
+                        prev.map((item, i) =>
+                          i === index
+                            ? { ...item, text: e.target.value }
+                            : item,
+                        ),
                       )
                     }
                     placeholder="按钮文字"
@@ -2295,7 +3502,9 @@ function ButtonMessageForm({
                     value={button.url}
                     onChange={(e) =>
                       setButtons((prev) =>
-                        prev.map((item, i) => (i === index ? { ...item, url: e.target.value } : item))
+                        prev.map((item, i) =>
+                          i === index ? { ...item, url: e.target.value } : item,
+                        ),
                       )
                     }
                     placeholder="https://…"
@@ -2304,7 +3513,9 @@ function ButtonMessageForm({
                     <button
                       type="button"
                       className="rounded-xl px-3 text-zinc-500 hover:text-[#ff7464]"
-                      onClick={() => setButtons((prev) => prev.filter((_, i) => i !== index))}
+                      onClick={() =>
+                        setButtons((prev) => prev.filter((_, i) => i !== index))
+                      }
                       aria-label={`删除按钮 ${index + 1}`}
                     >
                       <Trash2 size={16} />
@@ -2315,7 +3526,9 @@ function ButtonMessageForm({
             </div>
             <button
               type="button"
-              onClick={() => setButtons((prev) => [...prev, { text: "", url: "" }])}
+              onClick={() =>
+                setButtons((prev) => [...prev, { text: "", url: "" }])
+              }
               className="mt-3 flex items-center gap-2 text-xs text-[#b6ff4d]"
             >
               <Plus size={15} /> 添加按钮
@@ -2323,7 +3536,12 @@ function ButtonMessageForm({
           </div>
         </div>
 
-        <ButtonMessagePreview text={text} buttons={buttons} file={file} previewUrl={previewUrl} />
+        <ButtonMessagePreview
+          text={text}
+          buttons={buttons}
+          file={file}
+          previewUrl={previewUrl}
+        />
       </div>
 
       <ActionButton type="submit" icon={<Send size={17} />}>
@@ -2337,7 +3555,7 @@ function ButtonMessagePreview({
   text,
   buttons,
   file,
-  previewUrl
+  previewUrl,
 }: {
   text: string;
   buttons: { text: string; url: string }[];
@@ -2352,34 +3570,63 @@ function ButtonMessagePreview({
   return (
     <div className="rounded-2xl border border-white/10 bg-[#0b1016] p-3">
       <div className="mb-3 flex items-center justify-between">
-        <span className="font-mono text-[10px] tracking-[0.16em] text-zinc-500">LIVE PREVIEW</span>
+        <span className="font-mono text-[10px] tracking-[0.16em] text-zinc-500">
+          LIVE PREVIEW
+        </span>
         <span className="text-[10px] text-[#b6ff4d]">Telegram HTML</span>
       </div>
       <div className="overflow-hidden rounded-xl bg-[#182533] shadow-lg">
         {file && previewUrl && file.type.startsWith("image/") && (
-          <img src={previewUrl} alt="媒体预览" className="max-h-56 w-full object-cover" />
+          <img
+            src={previewUrl}
+            alt="媒体预览"
+            className="max-h-56 w-full object-cover"
+          />
         )}
         {file && previewUrl && file.type.startsWith("video/") && (
-          <video src={previewUrl} controls className="max-h-56 w-full bg-black object-contain" />
+          <video
+            src={previewUrl}
+            controls
+            className="max-h-56 w-full bg-black object-contain"
+          />
         )}
-        {file && previewUrl && (file.type === "image/gif" || file.name.toLowerCase().endsWith(".gif")) && (
-          <img src={previewUrl} alt="GIF 预览" className="max-h-56 w-full object-cover" />
-        )}
-        <div className="whitespace-pre-wrap break-words px-3 py-3 text-sm leading-6 text-white [&_blockquote]:my-2 [&_blockquote]:border-l-4 [&_blockquote]:border-[#70c7ff]/60 [&_blockquote]:bg-black/15 [&_blockquote]:px-3 [&_blockquote]:py-1 [&_code]:rounded [&_code]:bg-black/35 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-[#ffd479] [&_pre]:my-2 [&_pre]:overflow-x-auto [&_pre]:rounded-lg [&_pre]:bg-black/45 [&_pre]:p-3">{renderHtml(text)}</div>
-        {buttons.filter((button) => button.text).map((button, index) => (
-          <a key={index} href={button.url || "#"} target="_blank" rel="noreferrer" className="mx-3 mb-2 block rounded-lg bg-[#2a9df4]/25 px-3 py-2 text-center text-sm text-[#70c7ff]">
-            {button.text}
-          </a>
-        ))}
+        {file &&
+          previewUrl &&
+          (file.type === "image/gif" ||
+            file.name.toLowerCase().endsWith(".gif")) && (
+            <img
+              src={previewUrl}
+              alt="GIF 预览"
+              className="max-h-56 w-full object-cover"
+            />
+          )}
+        <div className="whitespace-pre-wrap break-words px-3 py-3 text-sm leading-6 text-white [&_blockquote]:my-2 [&_blockquote]:border-l-4 [&_blockquote]:border-[#70c7ff]/60 [&_blockquote]:bg-black/15 [&_blockquote]:px-3 [&_blockquote]:py-1 [&_code]:rounded [&_code]:bg-black/35 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-[#ffd479] [&_pre]:my-2 [&_pre]:overflow-x-auto [&_pre]:rounded-lg [&_pre]:bg-black/45 [&_pre]:p-3">
+          {renderHtml(text)}
+        </div>
+        {buttons
+          .filter((button) => button.text)
+          .map((button, index) => (
+            <a
+              key={index}
+              href={button.url || "#"}
+              target="_blank"
+              rel="noreferrer"
+              className="mx-3 mb-2 block rounded-lg bg-[#2a9df4]/25 px-3 py-2 text-center text-sm text-[#70c7ff]"
+            >
+              {button.text}
+            </a>
+          ))}
       </div>
-      {file && <p className="mt-2 truncate text-[10px] text-zinc-500">{file.name}</p>}
+      {file && (
+        <p className="mt-2 truncate text-[10px] text-zinc-500">{file.name}</p>
+      )}
     </div>
   );
 }
 
 function OldButtonForm({
   channels,
-  onSubmit
+  onSubmit,
 }: {
   channels: Record<string, string>;
   onSubmit: (payload: Record<string, string>) => Promise<void>;
@@ -2395,20 +3642,45 @@ function OldButtonForm({
       onSubmit={async (event) => {
         event.preventDefault();
         if (!channelId || !msgId || !buttonText) return;
-        await onSubmit({ ch_id: channelId, msg_id: msgId, btn_text: buttonText, url });
+        await onSubmit({
+          ch_id: channelId,
+          msg_id: msgId,
+          btn_text: buttonText,
+          url,
+        });
       }}
     >
       <Field label="频道">
-        <ChannelPicker channels={channels} value={channelId} onChange={setChannelId} />
+        <ChannelPicker
+          channels={channels}
+          value={channelId}
+          onChange={setChannelId}
+        />
       </Field>
       <Field label="消息 ID 或消息链接">
-        <input className="input" value={msgId} onChange={(e) => setMsgId(e.target.value)} placeholder="311 或消息链接" />
+        <input
+          className="input"
+          value={msgId}
+          onChange={(e) => setMsgId(e.target.value)}
+          placeholder="311 或消息链接"
+        />
       </Field>
       <Field label="按钮文字" hint="填写“删除”可清除该消息全部按钮。">
-        <input className="input" value={buttonText} onChange={(e) => setButtonText(e.target.value)} placeholder="按钮文字或删除" />
+        <input
+          className="input"
+          value={buttonText}
+          onChange={(e) => setButtonText(e.target.value)}
+          placeholder="按钮文字或删除"
+        />
       </Field>
       <Field label="跳转 URL">
-        <input className="input" type="url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://…" />
+        <input
+          className="input"
+          type="url"
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          placeholder="https://…"
+        />
       </Field>
       <ActionButton type="submit" icon={<Settings2 size={17} />}>
         更新消息按钮
@@ -2420,11 +3692,16 @@ function OldButtonForm({
 function BackupForm({
   channels,
   groups,
-  onSubmit
+  onSubmit,
 }: {
   channels: Record<string, string>;
   groups: Group[];
-  onSubmit: (payload: { src: string; tgt: string[]; link: string; wash: boolean }) => Promise<void>;
+  onSubmit: (payload: {
+    src: string;
+    tgt: string[];
+    link: string;
+    wash: boolean;
+  }) => Promise<void>;
 }) {
   const [source, setSource] = useState("");
   const [link, setLink] = useState("");
@@ -2465,11 +3742,23 @@ function BackupForm({
       )}
 
       <Field label="来源频道">
-        <ChannelPicker channels={channels} value={source} onChange={setSource} />
+        <ChannelPicker
+          channels={channels}
+          value={source}
+          onChange={setSource}
+        />
       </Field>
 
-      <Field label="最新消息链接" hint="系统将备份从历史起点至该消息为止的有效内容。">
-        <input className="input" value={link} onChange={(e) => setLink(e.target.value)} placeholder="https://t.me/…" />
+      <Field
+        label="最新消息链接"
+        hint="系统将备份从历史起点至该消息为止的有效内容。"
+      >
+        <input
+          className="input"
+          value={link}
+          onChange={(e) => setLink(e.target.value)}
+          placeholder="https://t.me/…"
+        />
       </Field>
 
       <Field label="目标频道">
@@ -2481,14 +3770,18 @@ function BackupForm({
                   channels={channels}
                   value={target}
                   onChange={(value) =>
-                    setTargets((prev) => prev.map((item, i) => (i === index ? value : item)))
+                    setTargets((prev) =>
+                      prev.map((item, i) => (i === index ? value : item)),
+                    )
                   }
                 />
               </div>
               {targets.length > 1 && (
                 <button
                   type="button"
-                  onClick={() => setTargets((prev) => prev.filter((_, i) => i !== index))}
+                  onClick={() =>
+                    setTargets((prev) => prev.filter((_, i) => i !== index))
+                  }
                   className="rounded-xl px-3 text-zinc-500 hover:text-[#ff7464]"
                 >
                   <Trash2 size={16} />
@@ -2534,7 +3827,7 @@ function SingleChannelActionForm({
   label,
   buttonText,
   icon,
-  onSubmit
+  onSubmit,
 }: {
   channels: Record<string, string>;
   label: string;
@@ -2553,7 +3846,11 @@ function SingleChannelActionForm({
       }}
     >
       <Field label={label}>
-        <ChannelPicker channels={channels} value={channelId} onChange={setChannelId} />
+        <ChannelPicker
+          channels={channels}
+          value={channelId}
+          onChange={setChannelId}
+        />
       </Field>
       <div className="rounded-2xl border border-[#b6ff4d]/15 bg-[#b6ff4d]/[0.04] p-4 text-xs leading-6 text-zinc-400">
         操作将在后台执行，完成结果将发送至当前 Telegram 机器人会话。
@@ -2567,64 +3864,157 @@ function SingleChannelActionForm({
 
 function MemberMonitorForm({
   channels,
-  onSubmit
+  onSubmit,
 }: {
   channels: Record<string, string>;
   onSubmit: (channelId: string, interval: number) => Promise<void>;
 }) {
   const [channelId, setChannelId] = useState("");
   const [interval, setInterval] = useState("60");
-  return <form className="space-y-5" onSubmit={async (event) => {
-    event.preventDefault();
-    if (!channelId || !/^\d+$/.test(interval) || Number(interval) < 1) return;
-    await onSubmit(channelId, Number(interval));
-  }}>
-    <Field label="频道或群组"><ChannelPicker channels={channels} value={channelId} onChange={setChannelId} /></Field>
-    <Field label="检测间隔（分钟）" hint="每次检测会覆盖该频道在 WebDAV 上的独立 CSV 备份。">
-      <input className="input" type="number" min="1" value={interval} onChange={(event) => setInterval(event.target.value)} />
-    </Field>
-    <ActionButton type="submit" icon={<UsersRound size={17} />}>创建成员备份任务</ActionButton>
-  </form>;
+  return (
+    <form
+      className="space-y-5"
+      onSubmit={async (event) => {
+        event.preventDefault();
+        if (!channelId || !/^\d+$/.test(interval) || Number(interval) < 1)
+          return;
+        await onSubmit(channelId, Number(interval));
+      }}
+    >
+      <Field label="频道或群组">
+        <ChannelPicker
+          channels={channels}
+          value={channelId}
+          onChange={setChannelId}
+        />
+      </Field>
+      <Field
+        label="检测间隔（分钟）"
+        hint="每次检测会覆盖该频道在 WebDAV 上的独立 CSV 备份。"
+      >
+        <input
+          className="input"
+          type="number"
+          min="1"
+          value={interval}
+          onChange={(event) => setInterval(event.target.value)}
+        />
+      </Field>
+      <ActionButton type="submit" icon={<UsersRound size={17} />}>
+        创建成员备份任务
+      </ActionButton>
+    </form>
+  );
 }
 
-function MemberMonitorCard({ item, channels, notify, refresh, updateFromResponse }: {
+function MemberMonitorCard({
+  item,
+  channels,
+  notify,
+  refresh,
+  updateFromResponse,
+}: {
   item: MemberMonitor;
   channels: Record<string, string>;
   notify: (text: string, type?: "ok" | "error") => void;
   refresh: () => Promise<void>;
-  updateFromResponse: (result: { ok: boolean; user?: UserData; msg?: string }) => boolean;
+  updateFromResponse: (result: {
+    ok: boolean;
+    user?: UserData;
+    msg?: string;
+  }) => boolean;
 }) {
   const [interval, setInterval] = useState(String(item.interval || 60));
-  return <div className="rounded-xl border border-white/10 p-3 text-xs">
-    <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center"><div>
-      <p className="text-zinc-200">{channelName(item.channel_id, channels)}</p>
-      <p className="mt-1 text-zinc-500">{item.member_count || 0} 人{item.last_run ? ` · ${new Date(item.last_run * 1000).toLocaleString()}` : " · 等待首次备份"}</p>
-      {item.last_error && <p className="mt-1 text-[#ff7464]">{item.last_error}</p>}
-    </div><div className="flex flex-wrap items-center gap-2">
-      <input className="input !w-20 !px-2 !py-1.5" type="number" min="1" aria-label="检测间隔（分钟）" value={interval} onChange={(event) => setInterval(event.target.value)} />
-      <span className="text-zinc-500">分钟</span>
-      <button className="text-[#b6ff4d]" onClick={async () => {
-        const result = await requestApi<{ ok: boolean; user?: UserData; msg?: string }>(`/member_monitors/${encodeURIComponent(item.channel_id)}`, "PUT", { interval: Number(interval) });
-        if (updateFromResponse(result)) { notify("检测间隔已更新"); refresh(); }
-      }}>保存</button>
-      <button className="text-[#70c7ff]" onClick={async () => {
-        const result = await requestApi<{ ok: boolean; msg?: string }>(`/member_monitors/${encodeURIComponent(item.channel_id)}/download`, "POST");
-        notify(result.ok ? "文件将由机器人发送" : result.msg || "下载失败", result.ok ? "ok" : "error");
-      }}>下载</button>
-      <button className="text-[#ff7464]" onClick={async () => {
-        const result = await requestApi<{ ok: boolean; user?: UserData }>(`/member_monitors/${encodeURIComponent(item.channel_id)}`, "DELETE");
-        if (updateFromResponse(result)) refresh();
-      }}>停止</button>
-    </div></div>
-  </div>;
+  return (
+    <div className="rounded-xl border border-white/10 p-3 text-xs">
+      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+        <div>
+          <p className="text-zinc-200">
+            {channelName(item.channel_id, channels)}
+          </p>
+          <p className="mt-1 text-zinc-500">
+            {item.member_count || 0} 人
+            {item.last_run
+              ? ` · ${new Date(item.last_run * 1000).toLocaleString()}`
+              : " · 等待首次备份"}
+          </p>
+          {item.last_error && (
+            <p className="mt-1 text-[#ff7464]">{item.last_error}</p>
+          )}
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <input
+            className="input !w-20 !px-2 !py-1.5"
+            type="number"
+            min="1"
+            aria-label="检测间隔（分钟）"
+            value={interval}
+            onChange={(event) => setInterval(event.target.value)}
+          />
+          <span className="text-zinc-500">分钟</span>
+          <button
+            className="text-[#b6ff4d]"
+            onClick={async () => {
+              const result = await requestApi<{
+                ok: boolean;
+                user?: UserData;
+                msg?: string;
+              }>(
+                `/member_monitors/${encodeURIComponent(item.channel_id)}`,
+                "PUT",
+                { interval: Number(interval) },
+              );
+              if (updateFromResponse(result)) {
+                notify("检测间隔已更新");
+                refresh();
+              }
+            }}
+          >
+            保存
+          </button>
+          <button
+            className="text-[#70c7ff]"
+            onClick={async () => {
+              const result = await requestApi<{ ok: boolean; msg?: string }>(
+                `/member_monitors/${encodeURIComponent(item.channel_id)}/download`,
+                "POST",
+              );
+              notify(
+                result.ok ? "文件将由机器人发送" : result.msg || "下载失败",
+                result.ok ? "ok" : "error",
+              );
+            }}
+          >
+            下载
+          </button>
+          <button
+            className="text-[#ff7464]"
+            onClick={async () => {
+              const result = await requestApi<{ ok: boolean; user?: UserData }>(
+                `/member_monitors/${encodeURIComponent(item.channel_id)}`,
+                "DELETE",
+              );
+              if (updateFromResponse(result)) refresh();
+            }}
+          >
+            停止
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function ReplaceTagForm({
   channels,
-  onSubmit
+  onSubmit,
 }: {
   channels: Record<string, string>;
-  onSubmit: (payload: { ch_id: string; old_tag: string; new_tag: string }) => Promise<void>;
+  onSubmit: (payload: {
+    ch_id: string;
+    old_tag: string;
+    new_tag: string;
+  }) => Promise<void>;
 }) {
   const [channelId, setChannelId] = useState("");
   const [oldTag, setOldTag] = useState("");
@@ -2640,13 +4030,27 @@ function ReplaceTagForm({
       }}
     >
       <Field label="目标频道">
-        <ChannelPicker channels={channels} value={channelId} onChange={setChannelId} />
+        <ChannelPicker
+          channels={channels}
+          value={channelId}
+          onChange={setChannelId}
+        />
       </Field>
       <Field label="旧标签">
-        <input className="input" value={oldTag} onChange={(e) => setOldTag(e.target.value)} placeholder="#旧标签" />
+        <input
+          className="input"
+          value={oldTag}
+          onChange={(e) => setOldTag(e.target.value)}
+          placeholder="#旧标签"
+        />
       </Field>
       <Field label="新标签">
-        <input className="input" value={newTag} onChange={(e) => setNewTag(e.target.value)} placeholder="#新标签；填写“删除”可移除" />
+        <input
+          className="input"
+          value={newTag}
+          onChange={(e) => setNewTag(e.target.value)}
+          placeholder="#新标签；填写“删除”可移除"
+        />
       </Field>
       <ActionButton type="submit" icon={<Tags size={17} />}>
         执行替换
@@ -2656,9 +4060,13 @@ function ReplaceTagForm({
 }
 
 function BatchCreateForm({
-  onSubmit
+  onSubmit,
 }: {
-  onSubmit: (payload: { names: string; users: string; count: number }) => Promise<void>;
+  onSubmit: (payload: {
+    names: string;
+    users: string;
+    count: number;
+  }) => Promise<void>;
 }) {
   const [names, setNames] = useState("");
   const [users, setUsers] = useState("");
@@ -2673,18 +4081,37 @@ function BatchCreateForm({
         await onSubmit({
           names,
           users,
-          count: Math.max(1, Number(count) || 1)
+          count: Math.max(1, Number(count) || 1),
         });
       }}
     >
       <Field label="频道名称列表" hint="每行一个频道名称。">
-        <textarea className="input min-h-36" value={names} onChange={(e) => setNames(e.target.value)} placeholder={"频道名称 A\n频道名称 B\n频道名称 C"} />
+        <textarea
+          className="input min-h-36"
+          value={names}
+          onChange={(e) => setNames(e.target.value)}
+          placeholder={"频道名称 A\n频道名称 B\n频道名称 C"}
+        />
       </Field>
       <Field label="每个名称创建数量">
-        <input className="input" type="number" min="1" value={count} onChange={(e) => setCount(e.target.value)} />
+        <input
+          className="input"
+          type="number"
+          min="1"
+          value={count}
+          onChange={(e) => setCount(e.target.value)}
+        />
       </Field>
-      <Field label="自动添加管理员（可选）" hint="支持用户名、用户 ID；以空格、逗号或换行分隔。">
-        <textarea className="input min-h-24" value={users} onChange={(e) => setUsers(e.target.value)} placeholder="@your_bot 123456789" />
+      <Field
+        label="自动添加管理员（可选）"
+        hint="支持用户名、用户 ID；以空格、逗号或换行分隔。"
+      >
+        <textarea
+          className="input min-h-24"
+          value={users}
+          onChange={(e) => setUsers(e.target.value)}
+          placeholder="@your_bot 123456789"
+        />
       </Field>
       <ActionButton type="submit" icon={<Copy size={17} />}>
         提交批量创建
@@ -2697,7 +4124,10 @@ function LoadingScreen() {
   return (
     <div className="glass grid min-h-[560px] place-items-center rounded-[28px]">
       <div className="text-center">
-        <LoaderCircle className="mx-auto animate-spin text-[#b6ff4d]" size={32} />
+        <LoaderCircle
+          className="mx-auto animate-spin text-[#b6ff4d]"
+          size={32}
+        />
         <p className="mt-4 font-mono text-xs tracking-[0.16em] text-zinc-500">
           CONNECTING TO CONTROL NODE
         </p>
@@ -2708,7 +4138,7 @@ function LoadingScreen() {
 
 function Toast({
   type,
-  children
+  children,
 }: {
   type: "ok" | "error";
   children: ReactNode;
@@ -2719,7 +4149,7 @@ function Toast({
         "fixed bottom-24 left-1/2 z-[200] flex -translate-x-1/2 items-center gap-3 rounded-2xl border px-4 py-3 text-sm shadow-2xl backdrop-blur-xl lg:bottom-7",
         type === "ok"
           ? "border-[#b6ff4d]/30 bg-[#131b0a]/90 text-[#d9ffac]"
-          : "border-[#ff7464]/30 bg-[#24110f]/90 text-[#ffb1a8]"
+          : "border-[#ff7464]/30 bg-[#24110f]/90 text-[#ffb1a8]",
       )}
       initial={{ opacity: 0, y: 20, x: "-50%" }}
       animate={{ opacity: 1, y: 0, x: "-50%" }}
@@ -2733,20 +4163,25 @@ function Toast({
 
 function MobileNav({
   active,
-  onChange
+  onChange,
 }: {
   active: PageKey;
   onChange: (key: PageKey) => void;
 }) {
   return (
-    <nav aria-label="主导航" className="glass fixed bottom-[calc(10px+var(--safe-bottom))] left-3 right-3 z-40 flex rounded-[10px] p-1.5 lg:hidden">
+    <nav
+      aria-label="主导航"
+      className="glass fixed bottom-[calc(10px+var(--safe-bottom))] left-3 right-3 z-40 flex rounded-[10px] p-1.5 lg:hidden"
+    >
       {nav.map((item) => (
         <button
           key={item.key}
           onClick={() => onChange(item.key)}
           className={clsx(
             "relative flex min-h-14 min-w-0 flex-1 flex-col items-center justify-center gap-1 py-1.5 text-[9px] transition",
-            active === item.key ? "text-black" : "text-zinc-500 active:text-white"
+            active === item.key
+              ? "text-black"
+              : "text-zinc-500 active:text-white",
           )}
         >
           {active === item.key && (
@@ -2756,8 +4191,14 @@ function MobileNav({
               transition={{ type: "spring", stiffness: 400, damping: 30 }}
             />
           )}
-          <item.icon size={18} className="relative" strokeWidth={active === item.key ? 2.2 : 1.7} />
-          <span className="relative max-w-full truncate px-0.5">{item.label}</span>
+          <item.icon
+            size={18}
+            className="relative"
+            strokeWidth={active === item.key ? 2.2 : 1.7}
+          />
+          <span className="relative max-w-full truncate px-0.5">
+            {item.label}
+          </span>
         </button>
       ))}
     </nav>
@@ -2791,16 +4232,13 @@ function TelegramOnlyScreen() {
         </h1>
 
         <p className="mt-4 text-sm leading-7 text-zinc-400">
-          当前页面没有检测到 Telegram 身份验证信息。
-          请通过机器人菜单中的 Web App 按钮进入控制台。
+          当前页面没有检测到 Telegram 身份验证信息。 请通过机器人菜单中的 Web
+          App 按钮进入控制台。
         </p>
 
         <div className="mt-6 rounded-2xl border border-white/10 bg-black/20 p-4 text-left">
           <div className="flex items-start gap-3">
-            <CircleAlert
-              size={17}
-              className="mt-0.5 shrink-0 text-[#ff7464]"
-            />
+            <CircleAlert size={17} className="mt-0.5 shrink-0 text-[#ff7464]" />
             <div>
               <p className="text-xs font-medium text-zinc-200">
                 当前无法完成身份验证

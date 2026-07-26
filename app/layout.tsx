@@ -7,33 +7,33 @@ const geist = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
   display: "swap",
-  preload: true
+  preload: true,
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
   display: "swap",
-  preload: true
+  preload: true,
 });
 
 export const metadata: Metadata = {
   title: {
     default: "Nine7 Control Room",
-    template: "%s | Nine7"
+    template: "%s | Nine7",
   },
   description: "频道自动化控制中心",
   applicationName: "Nine7 Control Room",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Nine7"
+    title: "Nine7",
   },
   formatDetection: {
     telephone: false,
     email: false,
-    address: false
-  }
+    address: false,
+  },
 };
 
 export const viewport: Viewport = {
@@ -41,11 +41,11 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: "cover",
   themeColor: "#080a08",
-  colorScheme: "dark"
+  colorScheme: "dark",
 };
 
 export default function RootLayout({
-  children
+  children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
