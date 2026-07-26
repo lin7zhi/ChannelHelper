@@ -101,6 +101,11 @@ type BackendData = {
 };
 
 type PageKey = "overview" | "sync" | "tools" | "tasks" | "channels";
+type EditTask =
+  | { kind: "stat"; index: number; task: StatTask }
+  | { kind: "dir"; index: number; task: DirTask }
+  | null;
+
 type ModalKey =
   | "sync"
   | "channel"
@@ -226,6 +231,7 @@ const {
   const [activeTaskTab, setActiveTaskTab] = useState<"stats" | "dirs">("stats");
   const [data, setData] = useState<BackendData | null>(null);
   const [modal, setModal] = useState<ModalKey>(null);
+  const [editTask, setEditTask] = useState<EditTask>(null);
   const [loading, setLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
   const [toast, setToast] = useState<{ text: string; type: "ok" | "error" } | null>(
@@ -434,6 +440,13 @@ return (
                       openCreate={() =>
                         setModal(activeTaskTab === "stats" ? "stat" : "dir")
                       }
+                      openEdit={(kind, index) =>
+                        setEditTask(
+                          kind === "stat"
+                            ? { kind, index, task: user.stats_tasks[index] }
+                            : { kind, index, task: user.dir_tasks[index] }
+                        )
+                      }
                       removeStat={(index) =>
                         confirmAction("确认删除此统计任务？", async () => {
                           const result = await requestApi<{ ok: boolean; user?: UserData }>(
@@ -592,6 +605,28 @@ return (
             }
           }}
         />
+      </Modal>
+
+      <Modal open={Boolean(editTask)} onClose={() => setEditTask(null)} title="编辑自动任务">
+        {editTask && (
+          <TaskEditForm
+            kind={editTask.kind}
+            task={editTask.task}
+            channels={user.address_book}
+            onSubmit={async (field, value) => {
+              const endpoint = editTask.kind === "stat" ? `/stats/${editTask.index}` : `/dirs/${editTask.index}`;
+              const result = await requestApi<{ ok: boolean; user?: UserData; msg?: string }>(
+                endpoint,
+                "PUT",
+                { field, value }
+              );
+              if (updateFromResponse(result)) {
+                setEditTask(null);
+                refresh();
+              }
+            }}
+          />
+        )}
       </Modal>
 
       <Modal open={modal === "buttonNew"} onClose={() => setModal(null)} title="发送按钮消息">
@@ -1168,6 +1203,7 @@ function TasksPage({
   dirs: DirTask[];
   channels: Record<string, string>;
   openCreate: () => void;
+  openEdit: (kind: "stat" | "dir", index: number) => void;
   removeStat: (index: number) => void;
   removeDir: (index: number) => void;
 }) {
@@ -1209,12 +1245,21 @@ function TasksPage({
                     </p>
                     <h3 className="mt-2 text-lg font-medium">{task.task_name || "未命名统计"}</h3>
                   </div>
-                  <button
-                    onClick={() => removeStat(index)}
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => openEdit("stat", index)}
+                      className="rounded-xl p-2 text-zinc-500 transition hover:bg-white/[0.08] hover:text-white"
+                      aria-label="编辑统计任务"
+                    >
+                      <Settings2 size={16} />
+                    </button>
+                    <button
+                      onClick={() => removeStat(index)}
                     className="rounded-xl p-2 text-zinc-500 transition hover:bg-[#ff7464]/10 hover:text-[#ff7464]"
                   >
                     <Trash2 size={16} />
-                  </button>
+                    </button>
+                  </div>
                 </div>
 
                 <div className="mt-6 grid grid-cols-2 gap-3">
@@ -1248,12 +1293,21 @@ function TasksPage({
                     </p>
                     <h3 className="mt-2 text-lg font-medium">{task.task_name || "未命名目录"}</h3>
                   </div>
-                  <button
-                    onClick={() => removeDir(index)}
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => openEdit("dir", index)}
+                      className="rounded-xl p-2 text-zinc-500 transition hover:bg-white/[0.08] hover:text-white"
+                      aria-label="编辑目录任务"
+                    >
+                      <Settings2 size={16} />
+                    </button>
+                    <button
+                      onClick={() => removeDir(index)}
                     className="rounded-xl p-2 text-zinc-500 transition hover:bg-[#ff7464]/10 hover:text-[#ff7464]"
                   >
                     <Trash2 size={16} />
-                  </button>
+                    </button>
+                  </div>
                 </div>
 
                 <div className="mt-6 grid grid-cols-3 gap-3">
@@ -1271,6 +1325,91 @@ function TasksPage({
           </div>
         ))}
     </PagePanel>
+  );
+}
+
+function TaskEditForm({
+  kind,
+  task,
+  channels,
+  onSubmit
+}: {
+  kind: "stat" | "dir";
+  task: StatTask | DirTask;
+  channels: Record<string, string>;
+  onSubmit: (field: string, value: string) => Promise<void>;
+}) {
+  const stat = kind === "stat" ? (task as StatTask) : null;
+  const dir = kind === "dir" ? (task as DirTask) : null;
+  const [field, setField] = useState(kind === "stat" ? "task_name" : "interval");
+  const [value, setValue] = useState(() => {
+    if (kind === "stat") return stat?.task_name || "";
+    return String(dir?.interval || 15);
+  });
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (kind === "stat" && stat) {
+      const current = stat[field as keyof StatTask];
+      setValue(Array.isArray(current) ? current.join(" ") : String(current ?? ""));
+    }
+    if (kind === "dir" && dir) {
+      const current = dir[field as keyof DirTask];
+      setValue(Array.isArray(current) ? current.join(" ") : String(current ?? ""));
+    }
+  }, [field, kind, stat, dir]);
+
+  const fieldOptions = kind === "stat"
+    ? [
+        ["task_name", "任务名称"], ["table_title", "表头标题"],
+        ["channel_id", "频道 ID"], ["msg_id", "消息 ID 或链接"],
+        ["trigger_tag", "触发标签"], ["top_n", "上榜名额"],
+        ["interval", "更新频率（分钟）"], ["duration", "存活期限（天）"],
+        ["add_stats_bl", "追加屏蔽名单"], ["rm_stats_bl", "移除屏蔽名单"],
+        ["blacklist_title", "屏蔽区标题"]
+      ]
+    : [
+        ["interval", "扫描频率（分钟）"], ["add_blacklist", "追加屏蔽标签"],
+        ["rm_blacklist", "移除屏蔽标签"], ["add_target", "添加发布目标 JSON"],
+        ["rm_target", "移除发布目标索引"]
+      ];
+
+  const submit = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!value.trim()) return;
+    if (["top_n", "interval", "duration", "rm_target"].includes(field) && !/^\d+$/.test(value.trim())) return;
+    if (field === "trigger_tag" && !value.trim().startsWith("#")) return;
+    if (field === "add_target") {
+      try {
+        const target = JSON.parse(value);
+        if (!target.channel_id || !target.msg_id) return;
+      } catch { return; }
+    }
+    setSubmitting(true);
+    await onSubmit(field, value.trim());
+    setSubmitting(false);
+  };
+
+  return (
+    <form onSubmit={submit} className="space-y-5">
+      <Field label="要修改的字段">
+        <select className="input" value={field} onChange={(event) => setField(event.target.value)}>
+          {fieldOptions.map(([key, label]) => <option key={key} value={key}>{label}</option>)}
+        </select>
+      </Field>
+      {field === "channel_id" && stat ? (
+        <Field label="新值"><ChannelPicker channels={channels} value={value} onChange={setValue} /></Field>
+      ) : field === "scan_id" && dir ? (
+        <Field label="新值"><ChannelPicker channels={channels} value={value} onChange={setValue} /></Field>
+      ) : (
+        <Field label="新值" hint={field === "add_target" ? '格式：{"channel_id":"-100...","msg_id":"123"}' : "多个值请用空格或换行分隔。"}>
+          <input className="input" type={["top_n", "interval", "duration", "rm_target"].includes(field) ? "number" : "text"} value={value} onChange={(event) => setValue(event.target.value)} />
+        </Field>
+      )}
+      <ActionButton type="submit" icon={submitting ? <LoaderCircle className="animate-spin" size={17} /> : <Settings2 size={17} />}>
+        保存修改
+      </ActionButton>
+    </form>
   );
 }
 
@@ -1350,7 +1489,8 @@ function PagePanel({
         <div>
           <p className="font-mono text-[10px] tracking-[0.2em] text-[#b6ff4d]">{eyebrow}</p>
           <h2 className="mt-2 text-[1.8rem] font-semibold tracking-[-0.055em] sm:text-4xl md:text-5xl">
-          <p className="mt-3 max-w-xl text-sm leading-7 text-zinc-400">{description}</p>
+            {title}
+          </h2>
         </div>
         {action}
       </div>
@@ -1980,6 +2120,17 @@ function ButtonNewForm({
   const [buttonText, setButtonText] = useState("");
   const [url, setUrl] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState("");
+
+  useEffect(() => {
+    if (!file) {
+      setPreviewUrl("");
+      return;
+    }
+    const nextUrl = URL.createObjectURL(file);
+    setPreviewUrl(nextUrl);
+    return () => URL.revokeObjectURL(nextUrl);
+  }, [file]);
 
   const insertFormat = (tag: string) => {
     setText((prev) => `${prev}<${tag}>文本</${tag}>`);
@@ -2014,55 +2165,107 @@ function ButtonNewForm({
         );
       }}
     >
-      <Field label="目标频道">
-        <ChannelPicker channels={channels} value={channelId} onChange={setChannelId} />
-      </Field>
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_280px]">
+        <div className="space-y-5">
+          <Field label="目标频道">
+            <ChannelPicker channels={channels} value={channelId} onChange={setChannelId} />
+          </Field>
 
-      <Field label="消息正文" hint="后端以 Telegram HTML 模式发送。">
-        <div className="mb-2 flex flex-wrap gap-2">
-          {[
-            ["粗体", "b"],
-            ["斜体", "i"],
-            ["下划线", "u"],
-            ["删除线", "s"],
-            ["代码", "code"],
-            ["引用", "blockquote"]
-          ].map(([label, tag]) => (
-            <button
-              type="button"
-              key={tag}
-              onClick={() => insertFormat(tag)}
-              className="rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-[11px] text-zinc-300 hover:bg-white/[0.09]"
-            >
-              {label}
-            </button>
-          ))}
+          <Field label="消息正文" hint="后端以 Telegram HTML 模式发送。">
+            <div className="mb-2 flex flex-wrap gap-2">
+              {[
+                ["粗体", "b"],
+                ["斜体", "i"],
+                ["下划线", "u"],
+                ["删除线", "s"],
+                ["代码", "code"],
+                ["引用", "blockquote"]
+              ].map(([label, tag]) => (
+                <button
+                  type="button"
+                  key={tag}
+                  onClick={() => insertFormat(tag)}
+                  className="rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-[11px] text-zinc-300 hover:bg-white/[0.09]"
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            <textarea className="input min-h-36" value={text} onChange={(e) => setText(e.target.value)} placeholder="输入消息内容…" />
+          </Field>
+
+          <Field label="附加媒体（可选）">
+            <input
+              className="block w-full rounded-xl border border-dashed border-white/15 bg-white/[0.03] p-3 text-xs text-zinc-400 file:mr-4 file:rounded-lg file:border-0 file:bg-[#b6ff4d] file:px-3 file:py-2 file:text-xs file:font-medium file:text-black"
+              type="file"
+              accept="image/*,video/*,.gif"
+              onChange={(e) => setFile(e.target.files?.[0] || null)}
+            />
+          </Field>
+
+          <div className="grid gap-5 md:grid-cols-2">
+            <Field label="按钮文字（可选）">
+              <input className="input" value={buttonText} onChange={(e) => setButtonText(e.target.value)} placeholder="点击打开" />
+            </Field>
+            <Field label="跳转 URL（可选）">
+              <input className="input" type="url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://…" />
+            </Field>
+          </div>
         </div>
-        <textarea className="input min-h-36" value={text} onChange={(e) => setText(e.target.value)} placeholder="输入消息内容…" />
-      </Field>
 
-      <Field label="附加媒体（可选）">
-        <input
-          className="block w-full rounded-xl border border-dashed border-white/15 bg-white/[0.03] p-3 text-xs text-zinc-400 file:mr-4 file:rounded-lg file:border-0 file:bg-[#b6ff4d] file:px-3 file:py-2 file:text-xs file:font-medium file:text-black"
-          type="file"
-          accept="image/*,video/*,.gif"
-          onChange={(e) => setFile(e.target.files?.[0] || null)}
-        />
-      </Field>
-
-      <div className="grid gap-5 md:grid-cols-2">
-        <Field label="按钮文字（可选）">
-          <input className="input" value={buttonText} onChange={(e) => setButtonText(e.target.value)} placeholder="点击打开" />
-        </Field>
-        <Field label="跳转 URL（可选）">
-          <input className="input" type="url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://…" />
-        </Field>
+        <ButtonMessagePreview text={text} buttonText={buttonText} url={url} file={file} previewUrl={previewUrl} />
       </div>
 
       <ActionButton type="submit" icon={<Send size={17} />}>
         发送到频道
       </ActionButton>
     </form>
+  );
+}
+
+function ButtonMessagePreview({
+  text,
+  buttonText,
+  url,
+  file,
+  previewUrl
+}: {
+  text: string;
+  buttonText: string;
+  url: string;
+  file: File | null;
+  previewUrl: string;
+}) {
+  const renderHtml = (value: string) => {
+    if (!value) return <span className="text-zinc-600">消息正文预览</span>;
+    return <div dangerouslySetInnerHTML={{ __html: value }} />;
+  };
+
+  return (
+    <div className="rounded-2xl border border-white/10 bg-[#0b1016] p-3">
+      <div className="mb-3 flex items-center justify-between">
+        <span className="font-mono text-[10px] tracking-[0.16em] text-zinc-500">LIVE PREVIEW</span>
+        <span className="text-[10px] text-[#b6ff4d]">Telegram HTML</span>
+      </div>
+      <div className="overflow-hidden rounded-xl bg-[#182533] shadow-lg">
+        {file && previewUrl && file.type.startsWith("image/") && (
+          <img src={previewUrl} alt="媒体预览" className="max-h-56 w-full object-cover" />
+        )}
+        {file && previewUrl && file.type.startsWith("video/") && (
+          <video src={previewUrl} controls className="max-h-56 w-full bg-black object-contain" />
+        )}
+        {file && previewUrl && (file.type === "image/gif" || file.name.toLowerCase().endsWith(".gif")) && (
+          <img src={previewUrl} alt="GIF 预览" className="max-h-56 w-full object-cover" />
+        )}
+        <div className="whitespace-pre-wrap break-words px-3 py-3 text-sm leading-6 text-white">{renderHtml(text)}</div>
+        {buttonText && (
+          <a href={url || "#"} target="_blank" rel="noreferrer" className="mx-3 mb-3 block rounded-lg bg-[#2a9df4]/25 px-3 py-2 text-center text-sm text-[#70c7ff]">
+            {buttonText}
+          </a>
+        )}
+      </div>
+      {file && <p className="mt-2 truncate text-[10px] text-zinc-500">{file.name}</p>}
+    </div>
   );
 }
 
@@ -2179,6 +2382,23 @@ function MultiButtonForm({
         >
           <Plus size={15} /> 添加按钮行
         </button>
+      </div>
+
+      <div className="rounded-2xl border border-white/10 bg-[#0b1016] p-3">
+        <div className="mb-3 flex items-center justify-between">
+          <span className="font-mono text-[10px] tracking-[0.16em] text-zinc-500">LIVE PREVIEW</span>
+          <span className="text-[10px] text-[#b6ff4d]">多按钮消息</span>
+        </div>
+        <div className="rounded-xl bg-[#182533] px-3 py-3 text-sm leading-6 text-white">
+          <div className="whitespace-pre-wrap break-words" dangerouslySetInnerHTML={{ __html: text || "消息正文预览" }} />
+          <div className="mt-3 grid gap-2">
+            {buttons.filter((button) => button.text).map((button, index) => (
+              <a key={index} href={button.url || "#"} target="_blank" rel="noreferrer" className="rounded-lg bg-[#2a9df4]/25 px-3 py-2 text-center text-sm text-[#70c7ff]">
+                {button.text}
+              </a>
+            ))}
+          </div>
+        </div>
       </div>
 
       <ActionButton type="submit" icon={<PanelsTopLeft size={17} />}>
