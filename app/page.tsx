@@ -397,13 +397,14 @@ return (
             </div>
           </header>
 
-          <AnimatePresence mode="wait">
+          <AnimatePresence initial={false} mode="popLayout">
             <motion.div
               key={activePage}
-              initial={{ opacity: 0, y: 14, filter: "blur(8px)" }}
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              exit={{ opacity: 0, y: -8, filter: "blur(8px)" }}
-              transition={{ duration: 0.25 }}
+              className="page-transition"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
             >
               {loading && !data ? (
                 <LoadingScreen />
@@ -1167,12 +1168,9 @@ function ToolsPage({
             key={tool.title}
             onClick={() => openModal(tool.modal)}
             className={clsx(
-  "sheen glass group relative min-h-[158px] overflow-hidden rounded-[20px] p-3.5 text-left transition hover:-translate-y-1 sm:min-h-64 sm:rounded-[24px] sm:p-5",
+              "sheen glass tool-card group relative min-h-[158px] overflow-hidden rounded-[20px] p-3.5 text-left transition-[transform,background-color,border-color,color,box-shadow] duration-150 hover:-translate-y-1 sm:min-h-64 sm:rounded-[24px] sm:p-5",
               index === 0 && "xl:col-span-2"
             )}
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.045 }}
           >
             <div className={clsx("absolute inset-0 bg-gradient-to-br opacity-70", tool.color)} />
             <div className="relative flex h-full flex-col">

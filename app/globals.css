@@ -219,6 +219,23 @@ main {
 }
 
 /*
+ * 页面切换仅改变合成层属性。避免 blur/filter 触发整页离屏绘制，
+ * 在 120Hz 屏幕上也能保持均匀的帧节奏。
+ */
+.page-transition {
+  will-change: opacity, transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .page-transition {
+    contain: paint;
+  }
+}
+
+/*
  * 长列表卡片在进入可视区域前跳过内部绘制。
  * contain-intrinsic-size 为浏览器预留近似高度，避免滚动条跳动。
  */
