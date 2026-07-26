@@ -322,14 +322,16 @@ const {
 }
 
 return (
-  <main className="min-h-screen px-2.5 py-2.5 md:px-8 md:py-7">
+  <main className="relative min-h-screen px-3 pb-28 pt-3 sm:px-5 md:px-8 md:py-7">
       <AmbientOrbs />
 
-      <div className="mx-auto grid max-w-[1600px] gap-5 lg:grid-cols-[244px_minmax(0,1fr)]">
-        <aside className="glass hidden min-h-[calc(100vh-56px)] rounded-[28px] p-4 lg:flex lg:flex-col">
+      <div className="mx-auto grid max-w-[1560px] gap-4 lg:grid-cols-[220px_minmax(0,1fr)] xl:gap-8">
+        <aside className="glass sticky top-7 hidden h-[calc(100vh-56px)] overflow-hidden rounded-[8px] p-4 lg:flex lg:flex-col">
+          <div className="absolute -right-12 top-24 h-40 w-40 rotate-12 border border-[#c8ff45]/10" />
           <Brand />
 
-          <nav className="mt-10 space-y-1">
+          <p className="mt-12 font-mono text-[9px] tracking-[.28em] text-zinc-600">NAVIGATION / 05</p>
+          <nav className="mt-4 space-y-1">
             {nav.map((item) => (
               <NavButton
                 key={item.key}
@@ -342,7 +344,7 @@ return (
             ))}
           </nav>
 
-          <div className="mt-auto rounded-2xl border border-white/10 bg-white/[0.035] p-4">
+          <div className="relative mt-auto border-t border-white/10 pt-5">
             <div className="flex items-center gap-2 text-xs text-zinc-400">
               <Radio
                 className={data?.userbot ? "text-[#b6ff4d]" : "text-[#ff7464]"}
@@ -350,7 +352,7 @@ return (
               />
               引擎状态
             </div>
-            <p className="mt-3 text-lg font-medium tracking-tight">
+            <p className="mt-3 text-2xl font-light tracking-[-.06em]">
               {data?.userbot ? "ONLINE" : "STANDBY"}
             </p>
             <p className="mt-1 font-mono text-[10px] text-zinc-500">
@@ -359,30 +361,30 @@ return (
           </div>
         </aside>
 
-        <section className="min-w-0">
-          <header className="glass mb-5 flex items-center justify-between rounded-[26px] px-4 py-3 md:px-6">
+        <section className="min-w-0 overflow-hidden">
+          <header className="mb-5 flex min-h-[64px] items-center justify-between border-b border-white/10 px-1 pb-3 pt-1 md:mb-8 md:min-h-[72px] md:px-0">
             <div className="flex shrink-0 items-center gap-3">
               <div>
-                <p className="font-mono text-[10px] tracking-[0.22em] text-[#b6ff4d]">
-                  NINE7 / SYSTEM
+                <p className="flex items-center gap-2 font-mono text-[9px] tracking-[0.24em] text-[#c8ff45]">
+                  <span className="h-1.5 w-1.5 bg-current" /> LIVE CONTROL
                 </p>
-                <h1 className="mt-1 text-xl font-semibold tracking-tight md:text-2xl">
+                <h1 className="mt-1 text-xl font-medium tracking-[-.04em] md:text-2xl">
                   {title}
                 </h1>
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex min-w-0 items-center gap-2 sm:gap-3">
               <button
                 onClick={refresh}
-                className="grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/[0.04] transition hover:bg-white/[0.09]"
+                className="grid h-11 w-11 shrink-0 place-items-center border border-white/10 bg-white/[0.025] transition hover:border-[#c8ff45]/50 hover:text-[#c8ff45]"
                 aria-label="刷新"
               >
                 <RefreshCcw size={17} className={loading ? "animate-spin" : ""} />
               </button>
 
-              <div className="flex items-center gap-3 border-l border-white/10 pl-3 sm:pl-4">
-                <div className="text-right">
+              <div className="flex min-w-0 items-center gap-2 border-l border-white/10 pl-2 sm:gap-3 sm:pl-4">
+                <div className="hidden min-w-0 text-right xs:block sm:block">
                   <p className="max-w-24 truncate text-sm font-medium sm:max-w-32">
                     {telegramDisplayName(telegramUser)}
                   </p>
@@ -744,14 +746,14 @@ function AmbientOrbs() {
   return (
     <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
       <motion.div
-        className="absolute -left-24 top-20 h-72 w-72 rounded-full bg-violet/15 blur-[100px]"
-        animate={{ x: [0, 45, -10, 0], y: [0, 25, 42, 0] }}
-        transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute -left-32 top-24 h-80 w-80 rounded-full bg-[#c8ff45]/10 blur-[120px]"
+        animate={{ x: [0, 70, 0], y: [0, 35, 0] }}
+        transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
       />
       <motion.div
-        className="absolute right-0 top-1/3 h-80 w-80 rounded-full bg-signal/10 blur-[110px]"
-        animate={{ x: [0, -60, 0], y: [0, 45, 0] }}
-        transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute right-0 top-1/3 h-96 w-96 rounded-full bg-[#63d8ff]/[0.06] blur-[140px]"
+        animate={{ x: [0, -45, 0], y: [0, 60, 0] }}
+        transition={{ duration: 26, repeat: Infinity, ease: "easeInOut" }}
       />
     </div>
   );
@@ -760,14 +762,13 @@ function AmbientOrbs() {
 function Brand() {
   return (
     <div className="flex items-center gap-3">
-      <div className="relative grid h-10 w-10 place-items-center overflow-hidden rounded-xl bg-[#b6ff4d] text-black">
-        <span className="font-mono text-sm font-black">N7</span>
-        <div className="absolute inset-x-0 bottom-0 h-1 bg-black/20" />
+      <div className="relative grid h-11 w-11 place-items-center overflow-hidden bg-[#c8ff45] text-black [clip-path:polygon(0_0,82%_0,100%_18%,100%_100%,18%_100%,0_82%)]">
+        <span className="font-mono text-sm font-black tracking-[-.12em]">N/7</span>
       </div>
       <div>
-        <p className="text-sm font-semibold tracking-tight">Nine7</p>
+        <p className="text-sm font-semibold tracking-[-.03em]">Nine7</p>
         <p className="font-mono text-[9px] tracking-[0.16em] text-zinc-500">
-          CONTROL ROOM
+          SIGNAL SYSTEM
         </p>
       </div>
     </div>
@@ -783,14 +784,14 @@ function Avatar({
     return (
       <img
         src={user.photo_url}
-        className="h-10 w-10 rounded-xl object-cover"
+        className="h-10 w-10 rounded-full object-cover ring-1 ring-white/15"
         alt={user.first_name}
       />
     );
   }
 
   return (
-    <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-violet to-[#41316f] text-sm font-semibold">
+    <div className="grid h-10 w-10 place-items-center rounded-full bg-gradient-to-br from-[#a58bff] to-[#423568] text-sm font-semibold ring-1 ring-white/15">
       {user?.first_name?.slice(0, 1) || "N"}
     </div>
   );
@@ -817,10 +818,10 @@ function NavButton({
     <button
       onClick={onClick}
       className={clsx(
-        "group flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm transition",
+        "group relative flex min-h-11 w-full items-center gap-3 px-3 py-3 text-left text-sm transition",
         active
-          ? "bg-[#b6ff4d] text-black shadow-[0_8px_30px_rgba(182,255,77,0.17)]"
-          : "text-zinc-400 hover:bg-white/[0.05] hover:text-white"
+          ? "bg-[#c8ff45] text-black shadow-[0_12px_35px_rgba(200,255,69,0.12)]"
+          : "text-zinc-500 hover:bg-white/[0.04] hover:text-white"
       )}
     >
       {icon}
@@ -856,28 +857,27 @@ function Overview({
   ];
 
   return (
-    <div className="space-y-5 pb-24 lg:pb-0">
-      <section className="glass relative overflow-hidden rounded-[28px] p-5 md:p-8">
-        <div className="absolute right-0 top-0 h-48 w-48 rounded-full bg-[#b6ff4d]/10 blur-[70px]" />
+    <div className="space-y-4 pb-24 lg:space-y-6 lg:pb-0">
+      <section className="glass relative min-h-[520px] overflow-hidden rounded-[8px] p-5 sm:min-h-[560px] md:p-9">
+        <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full border border-[#c8ff45]/20" />
+        <div className="absolute -right-2 top-0 h-full w-px bg-gradient-to-b from-transparent via-[#c8ff45]/30 to-transparent sm:right-12" />
+        <div className="absolute bottom-0 right-0 select-none font-mono text-[34vw] font-black leading-none tracking-[-.14em] text-white/[0.018] sm:text-[15rem]">07</div>
 
-        <div className="relative grid gap-8 xl:grid-cols-[1.1fr_0.9fr]">
-          <div>
+        <div className="relative grid min-h-[470px] gap-8 xl:grid-cols-[1.15fr_.85fr]">
+          <div className="flex flex-col">
             <p className="font-mono text-[10px] tracking-[0.2em] text-[#b6ff4d]">
-              AUTOMATION OBSERVATORY
+              AUTOMATION / ORCHESTRATION / ARCHIVE
             </p>
-            <h2 className="mt-3 max-w-3xl text-[2rem] font-semibold leading-[0.98] tracking-[-0.06em] sm:text-4xl md:text-6xl">
-              频道系统，
-              <br />
-              保持有序运转。
+            <h2 className="mt-5 max-w-4xl text-[clamp(3.25rem,13vw,7.8rem)] font-medium leading-[.78] tracking-[-.085em]">
+              CONTROL<br/><span className="ml-[.42em] text-[#c8ff45]">FLOW.</span>
             </h2>
-            <p className="mt-5 max-w-xl text-sm leading-7 text-zinc-400">
-              集中处理跨频道同步、智能备份、数据榜单、标签目录与频道基础设施。
+            <p className="mt-auto max-w-lg border-l border-[#c8ff45]/50 pl-4 text-sm leading-7 text-zinc-400">
+              一个持续在线的频道操作系统。同步、备份、榜单与目录在同一条清晰的信号链中运行。
             </p>
-
           </div>
 
-          <div className="relative min-h-[240px] overflow-hidden rounded-[24px] border border-white/10 bg-black/20 p-5">
-            <div className="absolute inset-0 opacity-20 [background-image:radial-gradient(#b6ff4d_1px,transparent_1px)] [background-size:18px_18px]" />
+          <div className="relative min-h-[260px] overflow-hidden border border-white/10 bg-black/20 p-5">
+            <div className="absolute inset-0 opacity-20 [background-image:linear-gradient(rgba(200,255,69,.2)_1px,transparent_1px),linear-gradient(90deg,rgba(200,255,69,.2)_1px,transparent_1px)] [background-size:28px_28px]" />
             <div className="relative flex h-full flex-col justify-between">
               <div className="flex items-center justify-between">
                 <span className="font-mono text-[10px] text-zinc-500">SYSTEM PULSE</span>
@@ -892,7 +892,7 @@ function Overview({
                 </span>
               </div>
 
-              <div className="relative mx-auto grid h-32 w-32 place-items-center rounded-full border border-[#b6ff4d]/30 bg-[#b6ff4d]/5">
+              <div className="relative mx-auto grid h-32 w-32 place-items-center rounded-full border border-[#c8ff45]/30 bg-[#c8ff45]/5">
                 <motion.div
                   className="absolute inset-[-12px] rounded-full border border-dashed border-[#b6ff4d]/30"
                   animate={{ rotate: 360 }}
@@ -910,11 +910,11 @@ function Overview({
         </div>
       </section>
 
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <section className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
         {metrics.map((metric, index) => (
           <motion.div
             key={metric.label}
-            className="glass sheen rounded-[22px] p-5"
+            className="glass sheen rounded-[6px] p-5"
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.06 }}
@@ -1096,14 +1096,14 @@ function ToolsPage({
       title="工具集"
       description="独立执行频道级操作。耗时任务会在机器人私聊中回传结果。"
     >
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
         {tools.map((tool, index) => (
           <motion.button
             key={tool.title}
             onClick={() => openModal(tool.modal)}
             className={clsx(
               "sheen glass tool-card group relative min-h-[158px] overflow-hidden rounded-[20px] p-3.5 text-left transition-[transform,background-color,border-color,color,box-shadow] duration-150 hover:-translate-y-1 sm:min-h-64 sm:rounded-[24px] sm:p-5",
-              index === 0 && "xl:col-span-2"
+              index === 0 && "col-span-2 xl:col-span-2"
             )}
           >
             <div className={clsx("absolute inset-0 bg-gradient-to-br opacity-70", tool.color)} />
@@ -1555,12 +1555,13 @@ function PagePanel({
 }) {
   return (
     <section className="pb-24 lg:pb-0">
-      <div className="mb-7 flex flex-col justify-between gap-5 md:flex-row md:items-end">
-        <div>
-          <p className="font-mono text-[10px] tracking-[0.2em] text-[#b6ff4d]">{eyebrow}</p>
-          <h2 className="mt-2 text-[1.8rem] font-semibold tracking-[-0.055em] sm:text-4xl md:text-5xl">
+      <div className="mb-7 grid gap-5 border-b border-white/10 pb-6 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
+        <div className="min-w-0">
+          <p className="font-mono text-[9px] tracking-[0.24em] text-[#c8ff45]">{eyebrow}</p>
+          <h2 className="mt-2 text-[clamp(2.5rem,11vw,5.5rem)] font-medium leading-[.9] tracking-[-0.075em]">
             {title}
           </h2>
+          <p className="mt-4 max-w-xl text-sm leading-6 text-zinc-500">{description}</p>
         </div>
         {action}
       </div>
@@ -1607,9 +1608,9 @@ function ActionButton({
       type={type}
       onClick={onClick}
       className={clsx(
-        "inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-medium transition active:scale-[0.98]",
+        "inline-flex min-h-12 items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition active:scale-[0.98]",
         variant === "primary"
-          ? "bg-[#b6ff4d] text-black shadow-[0_10px_35px_rgba(182,255,77,0.12)] hover:bg-[#ceff85]"
+          ? "bg-[#c8ff45] text-black shadow-[0_10px_35px_rgba(200,255,69,0.1)] hover:bg-[#d8ff7c]"
           : "border border-white/10 bg-white/[0.04] text-white hover:bg-white/[0.09]"
       )}
     >
@@ -1751,7 +1752,7 @@ function Modal({
     <AnimatePresence>
       {open && (
         <motion.div
-          className="modal-backdrop fixed inset-0 z-[100] flex items-end justify-center bg-black/70 p-0 backdrop-blur-md md:items-center md:p-6"
+          className="modal-backdrop fixed inset-0 z-[100] flex items-end justify-center bg-black/75 p-0 backdrop-blur-md md:items-center md:p-6"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -1761,22 +1762,23 @@ function Modal({
           }}
         >
           <motion.div
-            className="modal-sheet glass max-h-[88dvh] w-full max-w-2xl overflow-y-auto rounded-t-[22px] p-4 md:rounded-[28px] md:p-7"
+            className="modal-sheet glass max-h-[90dvh] w-full max-w-3xl overflow-y-auto rounded-t-[18px] p-5 md:rounded-[8px] md:p-8"
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={{ type: "tween", duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
           >
-            <div className="mb-7 flex items-center justify-between">
+            <div className="sticky -top-5 z-10 mb-7 flex items-center justify-between border-b border-white/10 bg-[#10130f]/95 pb-5 pt-1 md:-top-8 md:bg-[#10130f]/90 md:pt-2">
               <div>
                 <p className="font-mono text-[10px] tracking-[0.18em] text-[#b6ff4d]">
                   COMMAND SHEET
                 </p>
-                <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em]">{title}</h2>
+                <h2 className="mt-2 text-2xl font-medium tracking-[-0.05em] md:text-3xl">{title}</h2>
               </div>
               <button
                 onClick={onClose}
-                className="grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/[0.04] text-zinc-400 transition hover:text-white"
+                className="grid h-11 w-11 shrink-0 place-items-center border border-white/10 bg-white/[0.03] text-zinc-400 transition hover:border-[#c8ff45]/40 hover:text-white"
+                aria-label="关闭弹窗"
               >
                 <X size={18} />
               </button>
@@ -2737,25 +2739,25 @@ function MobileNav({
   onChange: (key: PageKey) => void;
 }) {
   return (
-    <nav className="glass fixed bottom-4 left-4 right-4 z-40 flex rounded-2xl p-1.5 lg:hidden">
+    <nav aria-label="主导航" className="glass fixed bottom-[calc(10px+var(--safe-bottom))] left-3 right-3 z-40 flex rounded-[10px] p-1.5 lg:hidden">
       {nav.map((item) => (
         <button
           key={item.key}
           onClick={() => onChange(item.key)}
           className={clsx(
-            "relative flex min-w-0 flex-1 flex-col items-center gap-1 rounded-xl py-2 text-[9px] transition",
-            active === item.key ? "text-black" : "text-zinc-500"
+            "relative flex min-h-14 min-w-0 flex-1 flex-col items-center justify-center gap-1 py-1.5 text-[9px] transition",
+            active === item.key ? "text-black" : "text-zinc-500 active:text-white"
           )}
         >
           {active === item.key && (
             <motion.span
               layoutId="mobile-nav"
-              className="absolute inset-0 rounded-xl bg-[#b6ff4d]"
+              className="absolute inset-0 bg-[#c8ff45] [clip-path:polygon(0_0,88%_0,100%_22%,100%_100%,12%_100%,0_78%)]"
               transition={{ type: "spring", stiffness: 400, damping: 30 }}
             />
           )}
-          <item.icon size={17} className="relative" />
-          <span className="relative truncate">{item.label}</span>
+          <item.icon size={18} className="relative" strokeWidth={active === item.key ? 2.2 : 1.7} />
+          <span className="relative max-w-full truncate px-0.5">{item.label}</span>
         </button>
       ))}
     </nav>
