@@ -24,7 +24,6 @@ import {
   Link2,
   ListFilter,
   LoaderCircle,
-  Menu,
   MessageSquareText,
   Plus,
   Radio,
@@ -83,11 +82,18 @@ type DirTask = {
   tags_cache: string[];
 };
 
+type MemberMonitor = {
+  channel_id: string;
+  started_at: number;
+  members: { id: number; username: string; first_name: string; last_name: string; joined_at: number }[];
+};
+
 type UserData = {
   groups: Group[];
   stats_tasks: StatTask[];
   dir_tasks: DirTask[];
   address_book: Record<string, string>;
+  member_monitors: MemberMonitor[];
 };
 
 type BackendData = {
@@ -123,7 +129,8 @@ const emptyUser: UserData = {
   groups: [],
   stats_tasks: [],
   dir_tasks: [],
-  address_book: {}
+  address_book: {},
+  member_monitors: []
 };
 
 const nav = [
@@ -230,13 +237,14 @@ const {
   const [data, setData] = useState<BackendData | null>(null);
   const [modal, setModal] = useState<ModalKey>(null);
   const [editTask, setEditTask] = useState<EditTask>(null);
+  const [editGroupIndex, setEditGroupIndex] = useState<number | null>(null);
+  const [editChannelId, setEditChannelId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [menuOpen, setMenuOpen] = useState(false);
   const [toast, setToast] = useState<{ text: string; type: "ok" | "error" } | null>(
     null
   );
 
-  const user = data?.user || emptyUser;
+  const user = data?.user ? { ...emptyUser, ...data.user } : emptyUser;
 
   const notify = (text: string, type: "ok" | "error" = "ok") => {
     setToast({ text, type });
@@ -350,14 +358,6 @@ return (
         <section className="min-w-0">
           <header className="glass mb-5 flex items-center justify-between rounded-[26px] px-4 py-3 md:px-6">
             <div className="flex shrink-0 items-center gap-3">
-              <button
-                className="grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/[0.04] lg:hidden"
-                onClick={() => setMenuOpen(true)}
-                aria-label="打开导航"
-              >
-                <Menu size={19} />
-              </button>
-
               <div>
                 <p className="font-mono text-[10px] tracking-[0.22em] text-[#b6ff4d]">
                   NINE7 / SYSTEM
@@ -409,7 +409,7 @@ return (
               ) : (
                 <>
                   {activePage === "overview" && (
-                    <Overview data={data} user={user} onNavigate={setActivePage} />
+                    <Overview data={data} user={user} />
                   )}
 
                   {activePage === "sync" && (
@@ -417,6 +417,7 @@ return (
                       groups={user.groups}
                       channels={user.address_book}
                       openCreate={() => setModal("sync")}
+                      edit={setEditGroupIndex}
                       remove={async (index) => {
                         confirmAction("确认移除这个同步组？", async () => {
                           const result = await requestApi<{ ok: boolean; user?: UserData }>(
@@ -475,6 +476,7 @@ return (
                     <ChannelsPage
                       channels={user.address_book}
                       openCreate={() => setModal("channel")}
+                      edit={setEditChannelId}
                       remove={(id) =>
                         confirmAction("确认从频道簿删除该频道？", async () => {
                           const result = await requestApi<{ ok: boolean; user?: UserData }>(
@@ -494,50 +496,6 @@ return (
       </div>
 
       <MobileNav active={activePage} onChange={setActivePage} />
-
-      <AnimatePresence>
-        {menuOpen && (
-          <motion.div
-            className="fixed inset-0 z-50 bg-black/70 p-4 backdrop-blur-md lg:hidden"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <motion.div
-              className="glass h-full max-w-sm rounded-[28px] p-4"
-              initial={{ x: -80 }}
-              animate={{ x: 0 }}
-              exit={{ x: -80 }}
-            >
-              <div className="flex items-center justify-between">
-                <Brand />
-                <button
-                  className="grid h-10 w-10 place-items-center rounded-xl bg-white/[0.05]"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  <X size={19} />
-                </button>
-              </div>
-
-              <nav className="mt-10 space-y-1">
-                {nav.map((item) => (
-                  <NavButton
-                    key={item.key}
-                    active={activePage === item.key}
-                    icon={<item.icon size={18} />}
-                    onClick={() => {
-                      setActivePage(item.key);
-                      setMenuOpen(false);
-                    }}
-                  >
-                    {item.label}
-                  </NavButton>
-                ))}
-              </nav>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       <AnimatePresence>
         {toast && <Toast type={toast.type}>{toast.text}</Toast>}
@@ -560,6 +518,15 @@ return (
         />
       </Modal>
 
+      <Modal open={editGroupIndex !== null} onClose={() => setEditGroupIndex(null)} title="编辑同步组">
+        {editGroupIndex !== null && user.groups[editGroupIndex] && (
+          <SyncForm channels={user.address_book} initial={user.groups[editGroupIndex]} submitText="保存同步路径" onSubmit={async (payload) => {
+            const result = await requestApi<{ ok: boolean; user?: UserData; msg?: string }>(`/groups/${editGroupIndex}`, "PUT", payload);
+            if (updateFromResponse(result)) { setEditGroupIndex(null); refresh(); }
+          }} />
+        )}
+      </Modal>
+
       <Modal open={modal === "channel"} onClose={() => setModal(null)} title="收录频道">
         <ChannelForm
           onSubmit={async (payload) => {
@@ -574,6 +541,15 @@ return (
             }
           }}
         />
+      </Modal>
+
+      <Modal open={editChannelId !== null} onClose={() => setEditChannelId(null)} title="编辑频道">
+        {editChannelId !== null && (
+          <ChannelForm initial={{ id: editChannelId, name: user.address_book[editChannelId] || "" }} submitText="保存频道" onSubmit={async (payload) => {
+            const result = await requestApi<{ ok: boolean; user?: UserData; msg?: string }>(`/channels/${encodeURIComponent(editChannelId)}`, "PUT", payload);
+            if (updateFromResponse(result)) { setEditChannelId(null); refresh(); }
+          }} />
+        )}
       </Modal>
 
       <Modal open={modal === "stat"} onClose={() => setModal(null)} title="创建统计任务">
@@ -723,23 +699,33 @@ return (
         />
       </Modal>
 
-      <Modal open={modal === "members"} onClose={() => setModal(null)} title="导出频道成员">
+      <Modal open={modal === "members"} onClose={() => setModal(null)} title="监控频道成员">
         <SingleChannelActionForm
           channels={user.address_book}
           label="频道或群组"
-          buttonText="开始导出"
+          buttonText="开始监控"
           icon={<UsersRound size={17} />}
           onSubmit={async (channelId) => {
             const result = await requestApi<{ ok: boolean; msg?: string }>(
-              "/backup_members",
+              "/member_monitors",
               "POST",
               { ch_id: channelId }
             );
             if (!result.ok) return notify(result.msg || "任务启动失败", "error");
-            notify("导出任务已提交，请在机器人会话接收文件");
+            notify("已开始监控新加入的频道成员");
             setModal(null);
+            refresh();
           }}
         />
+        {!!user.member_monitors.length && <div className="mt-5 space-y-2">
+          {user.member_monitors.map((item) => <div key={item.channel_id} className="flex items-center justify-between rounded-xl border border-white/10 p-3 text-xs">
+            <span>{channelName(item.channel_id, user.address_book)} · 已记录 {item.members.length} 人</span>
+            <button className="text-[#ff7464]" onClick={async () => {
+              const result = await requestApi<{ ok: boolean; user?: UserData }>(`/member_monitors/${encodeURIComponent(item.channel_id)}`, "DELETE");
+              if (updateFromResponse(result)) refresh();
+            }}>停止</button>
+          </div>)}
+        </div>}
       </Modal>
 
       <Modal open={modal === "batch"} onClose={() => setModal(null)} title="批量创建频道">
@@ -859,12 +845,10 @@ function NavButton({
 
 function Overview({
   data,
-  user,
-  onNavigate
+  user
 }: {
   data: BackendData | null;
   user: UserData;
-  onNavigate: (page: PageKey) => void;
 }) {
   const metrics = [
     { label: "同步矩阵", value: user.groups.length, icon: FolderSync, color: "text-[#b6ff4d]" },
@@ -897,18 +881,6 @@ function Overview({
               集中处理跨频道同步、智能备份、数据榜单、标签目录与频道基础设施。
             </p>
 
-            <div className="mt-7 flex flex-wrap gap-3">
-              <ActionButton icon={<FolderSync size={17} />} onClick={() => onNavigate("sync")}>
-                管理同步
-              </ActionButton>
-              <ActionButton
-                variant="ghost"
-                icon={<Boxes size={17} />}
-                onClick={() => onNavigate("tools")}
-              >
-                打开工具集
-              </ActionButton>
-            </div>
           </div>
 
           <div className="relative min-h-[240px] overflow-hidden rounded-[24px] border border-white/10 bg-black/20 p-5">
@@ -961,7 +933,7 @@ function Overview({
         ))}
       </section>
 
-      <section className="grid gap-5 xl:grid-cols-[1.3fr_0.7fr]">
+      <section>
         <div className="glass rounded-[26px] p-5 md:p-6">
           <SectionTitle
             eyebrow="NETWORK SUMMARY"
@@ -986,14 +958,6 @@ function Overview({
           </div>
         </div>
 
-        <div className="glass rounded-[26px] p-5 md:p-6">
-          <SectionTitle eyebrow="SHORTCUTS" title="快速入口" />
-          <div className="mt-6 space-y-2">
-            <QuickLink icon={<ArchiveRestore size={17} />} label="发起智能备份" onClick={() => onNavigate("tools")} />
-            <QuickLink icon={<Tags size={17} />} label="管理自动任务" onClick={() => onNavigate("tasks")} />
-            <QuickLink icon={<BookMarked size={17} />} label="更新频道地址簿" onClick={() => onNavigate("channels")} />
-          </div>
-        </div>
       </section>
     </div>
   );
@@ -1003,11 +967,13 @@ function SyncPage({
   groups,
   channels,
   openCreate,
+  edit,
   remove
 }: {
   groups: Group[];
   channels: Record<string, string>;
   openCreate: () => void;
+  edit: (index: number) => void;
   remove: (index: number) => void;
 }) {
   return (
@@ -1044,13 +1010,13 @@ function SyncPage({
                       {group.name || `同步组 ${index + 1}`}
                     </h3>
                   </div>
-                  <button
+                  <div className="flex gap-1"><button onClick={() => edit(index)} className="grid h-9 w-9 place-items-center rounded-xl text-zinc-500 hover:bg-white/[0.08] hover:text-white" aria-label="编辑同步组"><Settings2 size={16} /></button><button
                     onClick={() => remove(index)}
                     className="grid h-9 w-9 place-items-center rounded-xl border border-white/10 text-zinc-500 transition hover:border-[#ff7464]/40 hover:bg-[#ff7464]/10 hover:text-[#ff7464]"
                     aria-label="删除同步组"
                   >
                     <Trash2 size={16} />
-                  </button>
+                  </button></div>
                 </div>
 
                 <div className="mt-7 grid gap-3">
@@ -1116,8 +1082,8 @@ function ToolsPage({
       modal: "replace" as ModalKey
     },
     {
-      title: "导出频道成员",
-      desc: "导出成员资料为 CSV，并同步上传数据节点。",
+      title: "监控频道成员",
+      desc: "持续记录监控开启后新加入频道或群组的成员。",
       icon: UsersRound,
       color: "from-[#80caff]/25 to-transparent",
       modal: "members" as ModalKey
@@ -1497,10 +1463,12 @@ function TaskEditForm({
 function ChannelsPage({
   channels,
   openCreate,
+  edit,
   remove
 }: {
   channels: Record<string, string>;
   openCreate: () => void;
+  edit: (id: string) => void;
   remove: (id: string) => void;
 }) {
   const entries = Object.entries(channels);
@@ -1537,12 +1505,12 @@ function ChannelsPage({
                   <p className="mt-1 truncate font-mono text-[10px] text-zinc-500">{id}</p>
                 </div>
               </div>
-              <button
+              <div className="flex"><button onClick={() => edit(id)} className="rounded-xl p-2 text-zinc-500 transition hover:bg-white/[0.08] hover:text-white" aria-label="编辑频道"><Settings2 size={16} /></button><button
                 onClick={() => remove(id)}
                 className="rounded-xl p-2 text-zinc-500 transition hover:bg-[#ff7464]/10 hover:text-[#ff7464]"
               >
                 <Trash2 size={16} />
-              </button>
+              </button></div>
             </motion.div>
           ))}
         </div>
@@ -1656,27 +1624,6 @@ function MiniSignal({ label, value }: { label: string; value: string | number })
       <p className="font-mono text-lg tracking-[-0.08em]">{value}</p>
       <p className="mt-1 text-[10px] text-zinc-500">{label}</p>
     </div>
-  );
-}
-
-function QuickLink({
-  icon,
-  label,
-  onClick
-}: {
-  icon: ReactNode;
-  label: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className="group flex w-full items-center gap-3 rounded-xl border border-white/[0.07] bg-white/[0.025] p-3 text-left transition hover:bg-white/[0.07]"
-    >
-      <span className="text-[#b6ff4d]">{icon}</span>
-      <span className="flex-1 text-sm text-zinc-300">{label}</span>
-      <ChevronRight size={16} className="text-zinc-600 transition group-hover:translate-x-1" />
-    </button>
   );
 }
 
@@ -1885,14 +1832,18 @@ function ChannelPicker({
 
 function SyncForm({
   channels,
-  onSubmit
+  onSubmit,
+  initial,
+  submitText = "创建同步路径"
 }: {
   channels: Record<string, string>;
   onSubmit: (payload: { name: string; src: string; tgt: string[] }) => Promise<void>;
+  initial?: Group;
+  submitText?: string;
 }) {
-  const [name, setName] = useState("");
-  const [source, setSource] = useState("");
-  const [targets, setTargets] = useState([""]);
+  const [name, setName] = useState(initial?.name || "");
+  const [source, setSource] = useState(initial?.src || "");
+  const [targets, setTargets] = useState(initial ? (Array.isArray(initial.tgt) ? initial.tgt : [initial.tgt]) : [""]);
   const [submitting, setSubmitting] = useState(false);
 
   const submit = async (event: FormEvent) => {
@@ -1952,19 +1903,23 @@ function SyncForm({
       </button>
 
       <ActionButton type="submit" icon={submitting ? <LoaderCircle className="animate-spin" size={17} /> : <FolderSync size={17} />}>
-        创建同步路径
+        {submitText}
       </ActionButton>
     </form>
   );
 }
 
 function ChannelForm({
-  onSubmit
+  onSubmit,
+  initial,
+  submitText = "收录到频道簿"
 }: {
   onSubmit: (payload: { id: string; name: string }) => Promise<void>;
+  initial?: { id: string; name: string };
+  submitText?: string;
 }) {
-  const [id, setId] = useState("");
-  const [name, setName] = useState("");
+  const [id, setId] = useState(initial?.id || "");
+  const [name, setName] = useState(initial?.name || "");
 
   return (
     <form
@@ -1981,7 +1936,7 @@ function ChannelForm({
         <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="例如：主频道" />
       </Field>
       <ActionButton type="submit" icon={<BookMarked size={17} />}>
-        收录到频道簿
+        {submitText}
       </ActionButton>
     </form>
   );
